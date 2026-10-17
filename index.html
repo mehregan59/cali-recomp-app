@@ -12,8 +12,19 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#020617" />
 
-  <!-- Inline Web App Manifest for Android "Install App" -->
-  <link rel="manifest" href='data:application/manifest+json,{"name":"CaliRecomp Studio","short_name":"CaliRecomp","start_url":".","display":"standalone","background_color":"#020617","theme_color":"#020617","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/2964/2964514.png","sizes":"512x512","type":"image/png"}]}' />
+    <!-- Link to the real manifest.json file -->
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2964/2964514.png" />
+
+  <!-- Register the Service Worker so Android allows native installation -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js');
+      });
+    }
+  </script>
+
   <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2964/2964514.png" />
 
   <!-- Tailwind CSS & React via CDN (Zero Build Step Needed!) -->
