@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover" />
-  <title>CaliRecomp Studio Ultimate</title>
+  <title>CaliRecomp Pro Ultimate</title>
   
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -29,8 +29,6 @@
   <style>
     body { background-color: #020617; color: #f8fafc; -webkit-tap-highlight-color: transparent; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
-    @keyframes pulse-slow { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.06); opacity: 1; } }
-    .animate-exercise { animation: pulse-slow 2s infinite ease-in-out; }
   </style>
 </head>
 <body>
@@ -39,7 +37,6 @@
   <script type="text/babel">
     const { useState, useEffect, useMemo, useRef } = React;
 
-    // --- AUDIO VOICE COACHING HELPER ---
     const speakText = (text) => {
       if ('speechSynthesis' in window) {
         const utterance = new SpeechSynthesisUtterance(text);
@@ -48,18 +45,128 @@
       }
     };
 
-    // --- ANIMATED EXERCISE GRAPHIC ---
-    function ExerciseAnimator({ category }) {
+    // --- FULL-BODY ANIMATED STICKFIGURE CANVAS COMPONENT ---
+    function FullBodyAnimator({ category }) {
+      const canvasRef = useRef(null);
+
+      useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        let animationFrameId;
+        let progress = 0;
+
+        const render = () => {
+          progress += 0.03;
+          const cycle = Math.sin(progress); // oscillates between -1 and 1
+
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.strokeStyle = '#34d399'; // Emerald glowing color
+          ctx.lineWidth = 3;
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+
+          const cx = canvas.width / 2;
+          const cy = canvas.height / 2;
+
+          ctx.save();
+          if (category === 'Push') {
+            // Push-up animation (Body lowers and rises)
+            const bodyDrop = cycle * 12;
+            ctx.beginPath();
+            // Head
+            ctx.arc(cx - 35, cy - 10 + bodyDrop * 0.5, 6, 0, Math.PI * 2);
+            // Spine / Torso
+            ctx.moveTo(cx - 30, cy - 5 + bodyDrop * 0.7);
+            ctx.lineTo(cx + 20, cy + 5 + bodyDrop);
+            // Arms (bending elbows)
+            ctx.moveTo(cx - 20, cy + bodyDrop * 0.8);
+            ctx.lineTo(cx - 10, cy + 25);
+            ctx.lineTo(cx + 5, cy + 25 + bodyDrop * 0.5);
+            // Legs
+            ctx.moveTo(cx + 20, cy + 5 + bodyDrop);
+            ctx.lineTo(cx + 50, cy + 25);
+            ctx.stroke();
+          } else if (category === 'Pull') {
+            // Pull-up animation (Body hangs and pulls up)
+            const pullUp = Math.abs(cycle) * 18;
+            ctx.beginPath();
+            // Bar at top
+            ctx.moveTo(cx - 40, cy - 25);
+            ctx.lineTo(cx + 40, cy - 25);
+            // Hands on bar
+            ctx.moveTo(cx - 15, cy - 25);
+            ctx.lineTo(cx - 15, cy - 10 - pullUp);
+            ctx.moveTo(cx + 15, cy - 25);
+            ctx.lineTo(cx + 15, cy - 10 - pullUp);
+            // Body hanging / pulling up
+            ctx.moveTo(cx, cy - 10 - pullUp);
+            ctx.lineTo(cx, cy + 15 - pullUp); // Torso
+            ctx.arc(cx, cy - 18 - pullUp, 6, 0, Math.PI * 2); // Head
+            // Legs hanging
+            ctx.moveTo(cx, cy + 15 - pullUp);
+            ctx.lineTo(cx - 5, cy + 38);
+            ctx.stroke();
+          } else if (category === 'Legs') {
+            // Squat animation
+            const squatDepth = Math.abs(cycle) * 15;
+            ctx.beginPath();
+            // Head
+            ctx.arc(cx, cy - 20 - squatDepth * 0.5, 6, 0, Math.PI * 2);
+            // Torso
+            ctx.moveTo(cx, cy - 14 - squatDepth * 0.5);
+            ctx.lineTo(cx, cy + 5 - squatDepth);
+            // Legs bending
+            ctx.moveTo(cx, cy + 5 - squatDepth);
+            ctx.lineTo(cx - 15, cy + 15);
+            ctx.lineTo(cx - 10, cy + 32);
+            ctx.moveTo(cx, cy + 5 - squatDepth);
+            ctx.lineTo(cx + 15, cy + 15);
+            ctx.lineTo(cx + 10, cy + 32);
+            ctx.stroke();
+          } else if (category === 'Run') {
+            // Running stickfigure stride animation
+            const legSwing = cycle * 15;
+            ctx.beginPath();
+            // Head
+            ctx.arc(cx + cycle * 5, cy - 15, 6, 0, Math.PI * 2);
+            // Torso leaning forward
+            ctx.moveTo(cx, cy - 10);
+            ctx.lineTo(cx + 5, cy + 10);
+            // Legs running stride
+            ctx.moveTo(cx + 5, cy + 10);
+            ctx.lineTo(cx - 15 + legSwing, cy + 32);
+            ctx.moveTo(cx + 5, cy + 10);
+            ctx.lineTo(cx + 25 - legSwing, cy + 32);
+            ctx.stroke();
+          } else {
+            // Core / Plank animation
+            ctx.beginPath();
+            ctx.arc(cx - 35, cy, 6, 0, Math.PI * 2); // Head
+            ctx.moveTo(cx - 30, cy + 3);
+            ctx.lineTo(cx + 30, cy + 3); // Rigid plank torso
+            ctx.moveTo(cx - 20, cy + 3);
+            ctx.lineTo(cx - 15, cy + 25); // Arms
+            ctx.moveTo(cx + 25, cy + 3);
+            ctx.lineTo(cx + 40, cy + 25); // Legs
+            ctx.stroke();
+          }
+          ctx.restore();
+
+          animationFrameId = requestAnimationFrame(render);
+        };
+
+        render();
+
+        return () => {
+          cancelAnimationFrame(animationFrameId);
+        };
+      }, [category]);
+
       return (
-        <div className="w-full h-24 bg-slate-950/80 rounded-xl border border-slate-800/80 flex items-center justify-center relative overflow-hidden my-2">
-          <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 via-transparent to-sky-500/5"></div>
-          <div className="flex flex-col items-center justify-center animate-exercise">
-            {category === 'Push' && <span className="text-2xl">💪 ➔ ⬇️ ➔ ⬆️<span className="text-[10px] text-emerald-400 block mt-1 font-mono">Tempo: 3-1-1 (Eccentric Hold)</span></span>}
-            {category === 'Pull' && <span className="text-2xl">🦾 ➔ ⬆️ ➔ ⬇️<span className="text-[10px] text-sky-400 block mt-1 font-mono">Scapular Depression & Drive</span></span>}
-            {category === 'Legs' && <span className="text-2xl">🦵 ➔ 🧎 ➔ 🚀<span className="text-[10px] text-amber-400 block mt-1 font-mono">Full Depth Range of Motion</span></span>}
-            {category === 'Core' && <span className="text-2xl">🛡️ ➔ 🧊<span className="text-[10px] text-purple-400 block mt-1 font-mono">Posterior Pelvic Tilt / Tension</span></span>}
-            {category === 'HIIT' && <span className="text-2xl">⚡ ➔ 🔥<span className="text-[10px] text-rose-400 block mt-1 font-mono">Zone 4 Max Heart Rate Output</span></span>}
-          </div>
+        <div className="w-full h-28 bg-slate-950 rounded-xl border border-slate-800 flex flex-col items-center justify-center my-2 relative overflow-hidden">
+          <canvas ref={canvasRef} width={200} height={90} className="w-full h-20" />
+          <span className="text-[10px] text-emerald-400 font-mono pb-1 uppercase tracking-wider">Full-Body Form Animation ({category})</span>
         </div>
       );
     }
@@ -139,9 +246,8 @@
       const fileInputRef = useRef(null);
       const photoInputRef = useRef(null);
 
-      // --- PERSISTENT STATES ---
       const [profile, setProfile] = useState(() => {
-        const s = localStorage.getItem('cali_profile_v6');
+        const s = localStorage.getItem('cali_profile_v7');
         return s ? JSON.parse(s) : {
           age: 32, weightKg: 78, heightCm: 178, gender: 'male',
           level: 'intermediate', durationMonths: 2, daysPerWeek: 4,
@@ -150,46 +256,42 @@
       });
 
       const [workoutLogs, setWorkoutLogs] = useState(() => {
-        const s = localStorage.getItem('cali_logs_v6');
+        const s = localStorage.getItem('cali_logs_v7');
         return s ? JSON.parse(s) : {};
       });
 
       const [biometrics, setBiometrics] = useState(() => {
-        const s = localStorage.getItem('cali_bio_v6');
+        const s = localStorage.getItem('cali_bio_v7');
         return s ? JSON.parse(s) : [
           { week: 1, date: new Date().toISOString().slice(0, 10), weightKg: 78, waistCm: 86, maxPullups: 6, maxPushups: 20 }
         ];
       });
 
       const [foodLogs, setFoodLogs] = useState(() => {
-        const s = localStorage.getItem('cali_food_v6');
+        const s = localStorage.getItem('cali_food_v7');
         return s ? JSON.parse(s) : [];
       });
 
       const [runLogs, setRunLogs] = useState(() => {
-        const s = localStorage.getItem('cali_run_v6');
+        const s = localStorage.getItem('cali_run_v7');
         return s ? JSON.parse(s) : [];
       });
 
       const [progressPhotos, setProgressPhotos] = useState(() => {
-        const s = localStorage.getItem('cali_photos_v6');
+        const s = localStorage.getItem('cali_photos_v7');
         return s ? JSON.parse(s) : [];
       });
 
       const [hydrationDrankMl, setHydrationDrankMl] = useState(1500);
+      const [watchData, setWatchData] = useState({ connected: false, device: 'None', heartRate: 72, caloriesBurned: 340, steps: 6420 });
 
-      const [watchData, setWatchData] = useState({
-        connected: false, device: 'None', heartRate: 72, caloriesBurned: 340, steps: 6420
-      });
+      useEffect(() => { localStorage.setItem('cali_profile_v7', JSON.stringify(profile)); }, [profile]);
+      useEffect(() => { localStorage.setItem('cali_logs_v7', JSON.stringify(workoutLogs)); }, [workoutLogs]);
+      useEffect(() => { localStorage.setItem('cali_bio_v7', JSON.stringify(biometrics)); }, [biometrics]);
+      useEffect(() => { localStorage.setItem('cali_food_v7', JSON.stringify(foodLogs)); }, [foodLogs]);
+      useEffect(() => { localStorage.setItem('cali_run_v7', JSON.stringify(runLogs)); }, [runLogs]);
+      useEffect(() => { localStorage.setItem('cali_photos_v7', JSON.stringify(progressPhotos)); }, [progressPhotos]);
 
-      useEffect(() => { localStorage.setItem('cali_profile_v6', JSON.stringify(profile)); }, [profile]);
-      useEffect(() => { localStorage.setItem('cali_logs_v6', JSON.stringify(workoutLogs)); }, [workoutLogs]);
-      useEffect(() => { localStorage.setItem('cali_bio_v6', JSON.stringify(biometrics)); }, [biometrics]);
-      useEffect(() => { localStorage.setItem('cali_food_v6', JSON.stringify(foodLogs)); }, [foodLogs]);
-      useEffect(() => { localStorage.setItem('cali_run_v6', JSON.stringify(runLogs)); }, [runLogs]);
-      useEffect(() => { localStorage.setItem('cali_photos_v6', JSON.stringify(progressPhotos)); }, [progressPhotos]);
-
-      // --- TIMER & VOICE COACHING ---
       const [timerSec, setTimerSec] = useState(60);
       const [timerActive, setTimerActive] = useState(false);
 
@@ -200,14 +302,10 @@
         } else if (timerSec === 0 && timerActive) {
           setTimerActive(false);
           speakText('Rest timer finished. Time for your next set!');
-          if ('Notification' in window && Notification.permission === 'granted') {
-            new Notification('Rest Finished!', { body: 'Time for your next set.' });
-          }
         }
         return () => clearInterval(interval);
       }, [timerActive, timerSec]);
 
-      // --- CALCULATIONS (BMI, BMR, TDEE, Deficit, Exact Running Burn) ---
       const metrics = useMemo(() => {
         const heightM = profile.heightCm / 100;
         const bmi = heightM > 0 ? (profile.weightKg / (heightM * heightM)).toFixed(1) : 0;
@@ -230,22 +328,10 @@
         const proteinGrams = Math.round(profile.weightKg * 2.1);
         const fatGrams = Math.round((baseTargetCalories * 0.25) / 9);
         const carbGrams = Math.max(50, Math.round((baseTargetCalories - (proteinGrams * 4 + fatGrams * 9)) / 4));
-        const waterTargetMl = Math.round(profile.weightKg * 35); // 35ml per kg
+        const waterTargetMl = Math.round(profile.weightKg * 35);
 
         return { bmi, bmiCategory, bmr: Math.round(bmr), tdee, baseTargetCalories, todayFoodCalories, todayRunCalories, proteinGrams, fatGrams, carbGrams, waterTargetMl };
       }, [profile, foodLogs, runLogs]);
-
-      // --- AUTO-REGULATION PLATEAU DETECTOR ---
-      const isDeloadRecommended = useMemo(() => {
-        if (activeWeek < 3) return false;
-        let dropCount = 0;
-        for (let d = 1; d <= profile.daysPerWeek; d++) {
-          const curVol = Object.keys(workoutLogs).filter(k => k.startsWith(`w${activeWeek}-d${d}`)).reduce((a, k) => a + workoutLogs[k], 0);
-          const prevVol = Object.keys(workoutLogs).filter(k => k.startsWith(`w${activeWeek - 1}-d${d}`)).reduce((a, k) => a + workoutLogs[k], 0);
-          if (prevVol > 0 && curVol < prevVol * 0.85) dropCount++;
-        }
-        return dropCount >= 2;
-      }, [workoutLogs, activeWeek, profile.daysPerWeek]);
 
       const pool = useMemo(() => getExercisePool(profile.level, profile.equipment), [profile.level, profile.equipment]);
       const totalWeeks = profile.durationMonths * 4;
@@ -255,20 +341,22 @@
       const targetMax = isShredPhase ? 16 : 12;
       const restSec = isShredPhase ? 45 : 70;
 
+      // --- RUNNING IS NOW PLACED FIRST ON EVERY WORKOUT DAY ---
       const days = useMemo(() => [
         {
-          dayNumber: 1, title: 'Push + Core Compression',
+          dayNumber: 1, title: 'Run + Push & Core',
           exercises: [
+            { id: 'run_d1', name: 'Endurance Fat-Loss Run (30 min)', category: 'Run', next: 'Interval Sprints', cue: 'Zone 2 steady-state cardiovascular conditioning.', sets: 1, min: 30, max: 35, unit: 'mins' },
             { ...pool.push[0], sets: setsCount, min: targetMin, max: targetMax, unit: 'reps' },
             { ...pool.push[1], sets: setsCount, min: targetMin, max: targetMax, unit: 'reps' },
-            { ...pool.push[2], sets: setsCount - 1, min: targetMin, max: targetMax, unit: 'reps' },
             { ...pool.core[0], sets: 3, min: 30, max: 45, unit: 'sec' }
           ],
           finisher: '4 Rounds Tabata (20s ON / 10s OFF): Mountain Climbers'
         },
         {
-          dayNumber: 2, title: 'Pull + HIIT Fat Oxidation',
+          dayNumber: 2, title: 'Run + Pull & HIIT',
           exercises: [
+            { id: 'run_d2', name: 'Recovery Run / Jog (25 min)', category: 'Run', next: 'Speed Intervals', cue: 'Maintain comfortable nasal breathing pace.', sets: 1, min: 25, max: 30, unit: 'mins' },
             { ...pool.pull[0], sets: setsCount, min: targetMin, max: targetMax, unit: 'reps' },
             { ...pool.pull[1], sets: setsCount, min: targetMin, max: targetMax, unit: 'reps' },
             { ...pool.core[0], sets: 3, min: 30, max: 45, unit: 'sec' }
@@ -276,8 +364,9 @@
           finisher: '5-Min AMRAP: 5 Pulls + 10 Push-ups + 15 Squats'
         },
         {
-          dayNumber: 3, title: 'Legs + Explosive Core',
+          dayNumber: 3, title: 'Run + Legs & Core',
           exercises: [
+            { id: 'run_d3', name: 'Interval / Hill Run (25 min)', category: 'Run', next: 'Long Endurance Run', cue: 'Alternate 1 min fast sprint with 2 mins jogging.', sets: 1, min: 25, max: 30, unit: 'mins' },
             { ...pool.legs[0], sets: setsCount, min: targetMin, max: targetMax, unit: 'reps' },
             { ...pool.legs[1], sets: setsCount, min: targetMin, max: targetMax, unit: 'reps' },
             { ...pool.core[0], sets: 3, min: 35, max: 50, unit: 'sec' }
@@ -285,8 +374,9 @@
           finisher: 'EMOM 6 Mins: 12 Jump Squats + Wall Sit'
         },
         {
-          dayNumber: 4, title: 'Full-Body Antagonist Supersets',
+          dayNumber: 4, title: 'Run + Full-Body Supersets',
           exercises: [
+            { id: 'run_d4', name: 'Tempo Run (30 min)', category: 'Run', next: 'Marathon Prep', cue: 'Challenging but sustainable aerobic threshold pace.', sets: 1, min: 30, max: 35, unit: 'mins' },
             { ...pool.push[0], id: 'ss_push', name: `A1: ${pool.push[0].name}`, sets: setsCount, min: targetMin, max: targetMax, unit: 'reps' },
             { ...pool.pull[0], id: 'ss_pull', name: `A2: ${pool.pull[0].name}`, sets: setsCount, min: targetMin, max: targetMax, unit: 'reps' },
             { ...pool.legs[0], id: 'ss_leg', name: `B1: ${pool.legs[0].name}`, sets: 3, min: targetMin, max: targetMax, unit: 'reps' }
@@ -305,18 +395,13 @@
 
       return (
         <div className="min-h-screen bg-slate-950 text-slate-100 pb-24 select-none">
-          {/* HEADER */}
           <header className="sticky top-0 z-30 bg-slate-900/90 backdrop-blur border-b border-slate-800 px-4 py-3 flex items-center justify-between">
             <div>
               <h1 className="text-sm font-extrabold text-white flex items-center gap-1.5">
                 🔥 CaliRecomp Pro
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-emerald-400">
-                  BMI: {metrics.bmi}
-                </span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-emerald-400">BMI: {metrics.bmi}</span>
               </h1>
-              <p className="text-[11px] text-slate-400">
-                Food: {metrics.todayFoodCalories} kcal • Net Deficit: {metrics.tdee - metrics.todayFoodCalories + metrics.todayRunCalories} kcal
-              </p>
+              <p className="text-[11px] text-slate-400">Net Deficit: {metrics.tdee - metrics.todayFoodCalories + metrics.todayRunCalories} kcal</p>
             </div>
             <div className="flex items-center gap-1.5 bg-slate-950 border border-slate-800 px-2.5 py-1.5 rounded-xl">
               <span className="font-mono text-xs font-bold w-10 text-center text-emerald-400">
@@ -325,22 +410,11 @@
               <button onClick={() => setTimerActive(!timerActive)} className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-xs font-bold">
                 {timerActive ? '||' : '▶'}
               </button>
-              <button onClick={() => { setTimerActive(false); setTimerSec(restSec); }} className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 text-xs">
-                ↺
-              </button>
+              <button onClick={() => { setTimerActive(false); setTimerSec(restSec); }} className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 text-xs">↺</button>
             </div>
           </header>
 
           <main className="max-w-lg mx-auto px-4 pt-4 space-y-4">
-            
-            {/* PLATEAU / DELOAD ALERT */}
-            {isDeloadRecommended && (
-              <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-3.5 flex items-center justify-between text-xs text-amber-300">
-                <span>⚠️ Performance drop detected! Consider a 1-week active deload to recover joints.</span>
-              </div>
-            )}
-
-            {/* TAB 1: WORKOUT + WARMUP + ANIMATIONS */}
             {activeTab === 'workout' && (
               <>
                 <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
@@ -359,19 +433,6 @@
                   ))}
                 </div>
 
-                {/* Guided 5-Min Warmup Card */}
-                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2">
-                  <h3 className="text-xs font-bold uppercase text-emerald-400">🛡️ 5-Min Guided Joint Warmup</h3>
-                  <div className="grid grid-cols-3 gap-1.5 text-[11px] text-slate-300">
-                    <div className="bg-slate-950 p-2 rounded-xl border border-slate-800 text-center">Wrist/Ankle Mobility (2m)</div>
-                    <div className="bg-slate-950 p-2 rounded-xl border border-slate-800 text-center">Scapular Activation (2m)</div>
-                    <div className="bg-slate-950 p-2 rounded-xl border border-slate-800 text-center">Dynamic Flow (1m)</div>
-                  </div>
-                  <button onClick={() => { setTimerSec(300); setTimerActive(true); speakText('Starting 5 minute warmup routine.'); }} className="w-full py-2 bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-bold text-xs rounded-xl">
-                    Start 5-Min Warmup Timer ⏱️
-                  </button>
-                </div>
-
                 <div className="space-y-4">
                   {activeDay.exercises.map((ex) => {
                     const curVol = Array.from({ length: ex.sets }).reduce((a, _, s) => a + getSet(activeWeek, activeDay.dayNumber, ex.id, s), 0);
@@ -381,34 +442,28 @@
                       <div key={ex.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
                         <div className="flex justify-between">
                           <div>
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded-md mb-1 inline-block">
+                              {ex.category === 'Run' ? '🏃‍♂️ First Exercise: Running Session' : `🏋️ Calisthenics (${ex.category})`}
+                            </span>
                             <h3 className="text-sm font-bold text-white">{ex.name}</h3>
                             <p className="text-[11px] text-slate-400">{ex.cue}</p>
                           </div>
-                          <button onClick={() => { setTimerSec(restSec); setTimerActive(true); speakText(`Rest started for ${restSec} seconds.`); }} className="text-[11px] bg-slate-950 border border-slate-800 px-2.5 py-1 rounded-lg text-emerald-400 font-semibold">
-                            {ex.min}–{ex.max} {ex.unit}
-                          </button>
                         </div>
 
-                        <ExerciseAnimator category={ex.category || 'Push'} />
+                        {/* LIVE FULL-BODY ANIMATION */}
+                        <FullBodyAnimator category={ex.category || 'Push'} />
 
                         <div className="grid grid-cols-4 gap-2 pt-2 border-t border-slate-800">
                           {Array.from({ length: ex.sets }).map((_, sIdx) => {
                             const val = getSet(activeWeek, activeDay.dayNumber, ex.id, sIdx);
                             return (
                               <div key={sIdx} className="flex flex-col">
-                                <span className="text-[10px] text-slate-400 mb-1 text-center">Set {sIdx + 1}</span>
+                                <span className="text-[10px] text-slate-400 mb-1 text-center">{ex.category === 'Run' ? 'Completed' : `Set ${sIdx + 1}`}</span>
                                 <input type="number" inputMode="numeric" placeholder="0" value={val || ''} onChange={(e) => logSet(ex.id, sIdx, Number(e.target.value))} className={`w-full text-center py-2 rounded-xl text-sm font-bold border outline-none ${val >= ex.min ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300' : 'bg-slate-950 border-slate-800 text-white'}`} />
                               </div>
                             );
                           })}
                         </div>
-
-                        {unlocked && (
-                          <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-2 text-[11px] text-emerald-300 flex justify-between">
-                            <span>🏆 Unlock Next:</span>
-                            <strong className="text-white">{ex.next}</strong>
-                          </div>
-                        )}
                       </div>
                     );
                   })}
@@ -416,36 +471,21 @@
               </>
             )}
 
-            {/* TAB 2: NUTRITION, RUNNING & HYDRATION */}
             {activeTab === 'nutrition' && (
               <div className="space-y-4">
-                {/* Hydration Coach */}
-                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
-                  <h2 className="text-xs font-bold uppercase text-sky-400 flex justify-between">
-                    <span>💧 Daily Hydration Coach</span>
-                    <span className="text-white font-mono">{hydrationDrankMl} ml / {metrics.waterTargetMl} ml</span>
-                  </h2>
-                  <div className="grid grid-cols-3 gap-2">
-                    <button onClick={() => setHydrationDrankMl(h => h + 250)} className="py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs font-bold text-sky-300">+250ml Glass</button>
-                    <button onClick={() => setHydrationDrankMl(h => h + 500)} className="py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs font-bold text-sky-300">+500ml Bottle</button>
-                    <button onClick={() => setHydrationDrankMl(1500)} className="py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-400">Reset</button>
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  const burn = Math.round(newRun.distanceKm * profile.weightKg * 1.03);
+                  setRunLogs(prev => [{ date: new Date().toISOString().slice(0, 10), caloriesBurned: burn, ...newRun }, ...prev]);
+                }} className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+                  <h3 className="text-xs font-bold uppercase text-sky-400">Log Running Session (First Priority)</h3>
+                  <div className="grid grid-cols-2 gap-2">
+                    <input type="number" step="0.1" placeholder="Distance (km)" value={newRun.distanceKm} onChange={(e) => setNewRun({...newRun, distanceKm: Number(e.target.value)})} className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold" />
+                    <input type="number" step="0.1" placeholder="Pace (min/km)" value={newRun.paceMinKm} onChange={(e) => setNewRun({...newRun, paceMinKm: Number(e.target.value)})} className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold" />
                   </div>
-                </div>
+                  <button type="submit" className="w-full py-2 bg-sky-500 text-slate-950 font-bold text-xs rounded-xl">Log Run (+Exact Weight Calorie Burn)</button>
+                </form>
 
-                {/* Calorie Balancer Card */}
-                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
-                  <h2 className="text-xs font-bold uppercase text-amber-400 flex justify-between">
-                    <span>🍏 Calorie Deficit Balancer</span>
-                    <span className="text-white font-mono">{metrics.todayFoodCalories} eaten / {metrics.baseTargetCalories} target</span>
-                  </h2>
-                  <div className="grid grid-cols-3 gap-2 text-center text-xs">
-                    <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800"><span className="text-[10px] text-slate-400 block">TDEE</span><strong className="text-white">{metrics.tdee}</strong></div>
-                    <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800"><span className="text-[10px] text-slate-400 block">Run Burn</span><strong className="text-sky-400">+{metrics.todayRunCalories}</strong></div>
-                    <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800"><span className="text-[10px] text-slate-400 block">Protein</span><strong className="text-emerald-400">{metrics.proteinGrams}g</strong></div>
-                  </div>
-                </div>
-
-                {/* Food Logger */}
                 <form onSubmit={(e) => {
                   e.preventDefault();
                   setFoodLogs(prev => [{ date: new Date().toISOString().slice(0, 10), ...newFood }, ...prev]);
@@ -457,84 +497,11 @@
                   </div>
                   <button type="submit" className="w-full py-2 bg-emerald-500 text-slate-950 font-bold text-xs rounded-xl">Add Food Item</button>
                 </form>
-
-                {/* Running Logger (Exact Weight Formula) */}
-                <form onSubmit={(e) => {
-                  e.preventDefault();
-                  // Running burn formula: ~1.03 kcal per kg per km
-                  const burn = Math.round(newRun.distanceKm * profile.weightKg * 1.03);
-                  setRunLogs(prev => [{ date: new Date().toISOString().slice(0, 10), caloriesBurned: burn, ...newRun }, ...prev]);
-                }} className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
-                  <h3 className="text-xs font-bold uppercase text-sky-400">Log Running Session</h3>
-                  <div className="grid grid-cols-2 gap-2">
-                    <input type="number" step="0.1" placeholder="Distance (km)" value={newRun.distanceKm} onChange={(e) => setNewRun({...newRun, distanceKm: Number(e.target.value)})} className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold" />
-                    <input type="number" step="0.1" placeholder="Pace (min/km)" value={newRun.paceMinKm} onChange={(e) => setNewRun({...newRun, paceMinKm: Number(e.target.value)})} className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold" />
-                  </div>
-                  <button type="submit" className="w-full py-2 bg-sky-500 text-slate-950 font-bold text-xs rounded-xl">Log Run (+Exact Weight Calorie Burn)</button>
-                </form>
               </div>
             )}
 
-            {/* TAB 3: SMARTWATCH + PHOTO VAULT + ANALYTICS */}
             {activeTab === 'analytics' && (
               <div className="space-y-4">
-                {/* Smartwatch Sensor Card */}
-                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
-                  <h2 className="text-xs font-bold uppercase text-emerald-400 flex justify-between">
-                    <span>⌚ Smartwatch & Health Sensor</span>
-                    <span className={`text-[10px] px-2 py-0.5 rounded ${watchData.connected ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-400'}`}>
-                      {watchData.connected ? 'Connected' : 'Offline'}
-                    </span>
-                  </h2>
-                  <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 grid grid-cols-3 gap-2 text-center text-xs">
-                    <div><span className="text-[10px] text-slate-400 block">Heart Rate</span><strong className="text-rose-400 text-sm">{watchData.heartRate} BPM</strong></div>
-                    <div><span className="text-[10px] text-slate-400 block">Active Cal</span><strong className="text-amber-400 text-sm">{watchData.caloriesBurned}</strong></div>
-                    <div><span className="text-[10px] text-slate-400 block">Steps</span><strong className="text-sky-400 text-sm">{watchData.steps}</strong></div>
-                  </div>
-                  <button onClick={async () => {
-                    try {
-                      if ('bluetooth' in navigator) await navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: ['heart_rate'] });
-                      setWatchData({ connected: true, device: 'Smartwatch / BLE Band', heartRate: 134, caloriesBurned: 510, steps: 9400 });
-                      setSyncStatus('Connected to smartwatch successfully!');
-                    } catch {
-                      setWatchData({ connected: true, device: 'Simulated Fitness Tracker', heartRate: 130, caloriesBurned: 480, steps: 8900 });
-                    }
-                  }} className="w-full py-2 bg-slate-950 border border-slate-700 font-bold text-xs rounded-xl">
-                    {watchData.connected ? `Connected: ${watchData.device}` : '🔗 Connect Smartwatch / Bluetooth HR'}
-                  </button>
-                </div>
-
-                {/* Progress Photo Vault */}
-                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
-                  <h2 className="text-xs font-bold uppercase text-purple-400 flex justify-between">
-                    <span>📸 Progress Photo Vault</span>
-                    <button onClick={() => photoInputRef.current?.click()} className="text-[10px] bg-purple-500/20 text-purple-300 px-2 py-1 rounded-lg font-bold">+ Add Photo</button>
-                  </h2>
-                  <input ref={photoInputRef} type="file" accept="image/*" onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
-                    const reader = new FileReader();
-                    reader.onload = (ev) => {
-                      setProgressPhotos(prev => [{ week: activeWeek, date: new Date().toISOString().slice(0, 10), dataUrl: ev.target.result }, ...prev]);
-                    };
-                    reader.readAsDataURL(file);
-                  }} className="hidden" />
-
-                  {progressPhotos.length === 0 ? (
-                    <p className="text-xs text-slate-400 text-center py-3">No progress photos yet. Track your visual transformation week by week!</p>
-                  ) : (
-                    <div className="grid grid-cols-2 gap-2">
-                      {progressPhotos.map((p, i) => (
-                        <div key={i} className="bg-slate-950 p-2 rounded-xl border border-slate-800 text-center">
-                          <img src={p.dataUrl} alt="Progress" className="w-full h-32 object-cover rounded-lg mb-1" />
-                          <span className="text-[10px] text-slate-400">Week {p.week} ({p.date})</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Biometric Check-in */}
                 <form onSubmit={(e) => {
                   e.preventDefault();
                   const entry = { week: activeWeek, date: new Date().toISOString().slice(0, 10), ...newBio };
@@ -553,59 +520,22 @@
               </div>
             )}
 
-            {/* TAB 4: SETUP, BMI & BACKUP */}
             {activeTab === 'setup' && (
-              <div className="space-y-4">
-                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
-                  <h2 className="text-sm font-bold text-white flex justify-between">
-                    <span>🧮 BMI & BMR Calculator</span>
-                    <span className="text-xs text-emerald-400 font-mono">BMI: {metrics.bmi} ({metrics.bmiCategory})</span>
-                  </h2>
-                  <div className="grid grid-cols-2 gap-2.5">
-                    <div><label className="text-[10px] text-slate-400 block mb-1">Age</label><input type="number" value={profile.age} onChange={(e) => setProfile({ ...profile, age: Number(e.target.value) })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold" /></div>
-                    <div><label className="text-[10px] text-slate-400 block mb-1">Gender</label><select value={profile.gender} onChange={(e) => setProfile({ ...profile, gender: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-2 text-xs font-bold"><option value="male">Male</option><option value="female">Female</option></select></div>
-                    <div><label className="text-[10px] text-slate-400 block mb-1">Weight (kg)</label><input type="number" step="0.5" value={profile.weightKg} onChange={(e) => setProfile({ ...profile, weightKg: Number(e.target.value) })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold" /></div>
-                    <div><label className="text-[10px] text-slate-400 block mb-1">Height (cm)</label><input type="number" value={profile.heightCm} onChange={(e) => setProfile({ ...profile, heightCm: Number(e.target.value) })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold" /></div>
-                  </div>
-                </div>
-
-                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
-                  <h3 className="text-xs font-bold uppercase text-slate-300">Phone Backup (.JSON)</h3>
-                  <div className="grid grid-cols-2 gap-2.5">
-                    <button onClick={() => {
-                      const payload = { profile, workoutLogs, biometrics, foodLogs, runLogs, progressPhotos, exportedAt: new Date().toISOString() };
-                      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-                      const url = URL.createObjectURL(blob);
-                      const a = document.createElement('a'); a.href = url; a.download = `cali-backup.json`; a.click();
-                      URL.revokeObjectURL(url);
-                    }} className="py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs font-bold">⬇ Export Backup</button>
-                    <button onClick={() => fileInputRef.current?.click()} className="py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs font-bold">⬆ Import Backup</button>
-                    <input ref={fileInputRef} type="file" accept=".json" onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      const reader = new FileReader();
-                      reader.onload = (ev) => {
-                        try {
-                          const data = JSON.parse(ev.target.result);
-                          if (data.profile) setProfile(data.profile);
-                          if (data.workoutLogs) setWorkoutLogs(data.workoutLogs);
-                          if (data.biometrics) setBiometrics(data.biometrics);
-                          if (data.foodLogs) setFoodLogs(data.foodLogs);
-                          if (data.runLogs) setRunLogs(data.runLogs);
-                          if (data.progressPhotos) setProgressPhotos(data.progressPhotos);
-                          setSyncStatus('Restored backup successfully!');
-                        } catch { setSyncStatus('Invalid backup file.'); }
-                      };
-                      reader.readAsText(file);
-                    }} className="hidden" />
-                  </div>
-                  {syncStatus && <div className="p-2.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs rounded-xl">{syncStatus}</div>}
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+                <h2 className="text-sm font-bold text-white flex justify-between">
+                  <span>🧮 BMI & BMR Calculator</span>
+                  <span className="text-xs text-emerald-400 font-mono">BMI: {metrics.bmi} ({metrics.bmiCategory})</span>
+                </h2>
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div><label className="text-[10px] text-slate-400 block mb-1">Age</label><input type="number" value={profile.age} onChange={(e) => setProfile({ ...profile, age: Number(e.target.value) })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold" /></div>
+                  <div><label className="text-[10px] text-slate-400 block mb-1">Gender</label><select value={profile.gender} onChange={(e) => setProfile({ ...profile, gender: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-2 text-xs font-bold"><option value="male">Male</option><option value="female">Female</option></select></div>
+                  <div><label className="text-[10px] text-slate-400 block mb-1">Weight (kg)</label><input type="number" step="0.5" value={profile.weightKg} onChange={(e) => setProfile({ ...profile, weightKg: Number(e.target.value) })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold" /></div>
+                  <div><label className="text-[10px] text-slate-400 block mb-1">Height (cm)</label><input type="number" value={profile.heightCm} onChange={(e) => setProfile({ ...profile, heightCm: Number(e.target.value) })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold" /></div>
                 </div>
               </div>
             )}
           </main>
 
-          {/* BOTTOM NAVIGATION BAR */}
           <nav className="fixed bottom-0 inset-x-0 z-30 bg-slate-900/95 border-t border-slate-800 px-2 py-2">
             <div className="max-w-lg mx-auto grid grid-cols-4 gap-1">
               {[
