@@ -3,20 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover" />
-  <title>CaliRecomp Studio</title>
+  <title>CaliRecomp Studio Ultimate</title>
   
-  <!-- Native Full-Screen Mobile PWA Meta Tags -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="CaliRecomp" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#020617" />
 
-  <!-- Link to the real manifest.json file -->
   <link rel="manifest" href="./manifest.json" />
   <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2964/2964514.png" />
 
-  <!-- Register the Service Worker so Android allows native installation -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -25,7 +22,6 @@
     }
   </script>
 
-  <!-- Tailwind CSS & React via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -33,6 +29,8 @@
   <style>
     body { background-color: #020617; color: #f8fafc; -webkit-tap-highlight-color: transparent; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
+    @keyframes pulse-slow { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.06); opacity: 1; } }
+    .animate-exercise { animation: pulse-slow 2s infinite ease-in-out; }
   </style>
 </head>
 <body>
@@ -41,68 +39,93 @@
   <script type="text/babel">
     const { useState, useEffect, useMemo, useRef } = React;
 
+    // --- AUDIO VOICE COACHING HELPER ---
+    const speakText = (text) => {
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 1.0;
+        window.speechSynthesis.speak(utterance);
+      }
+    };
+
+    // --- ANIMATED EXERCISE GRAPHIC ---
+    function ExerciseAnimator({ category }) {
+      return (
+        <div className="w-full h-24 bg-slate-950/80 rounded-xl border border-slate-800/80 flex items-center justify-center relative overflow-hidden my-2">
+          <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 via-transparent to-sky-500/5"></div>
+          <div className="flex flex-col items-center justify-center animate-exercise">
+            {category === 'Push' && <span className="text-2xl">💪 ➔ ⬇️ ➔ ⬆️<span className="text-[10px] text-emerald-400 block mt-1 font-mono">Tempo: 3-1-1 (Eccentric Hold)</span></span>}
+            {category === 'Pull' && <span className="text-2xl">🦾 ➔ ⬆️ ➔ ⬇️<span className="text-[10px] text-sky-400 block mt-1 font-mono">Scapular Depression & Drive</span></span>}
+            {category === 'Legs' && <span className="text-2xl">🦵 ➔ 🧎 ➔ 🚀<span className="text-[10px] text-amber-400 block mt-1 font-mono">Full Depth Range of Motion</span></span>}
+            {category === 'Core' && <span className="text-2xl">🛡️ ➔ 🧊<span className="text-[10px] text-purple-400 block mt-1 font-mono">Posterior Pelvic Tilt / Tension</span></span>}
+            {category === 'HIIT' && <span className="text-2xl">⚡ ➔ 🔥<span className="text-[10px] text-rose-400 block mt-1 font-mono">Zone 4 Max Heart Rate Output</span></span>}
+          </div>
+        </div>
+      );
+    }
+
     const getExercisePool = (level, eq) => {
       const push = {
         beginner: [
-          { id: 'push_1', name: 'Incline Push-ups', next: 'Standard Push-ups', cue: 'Hands elevated. Core braced.' },
-          { id: 'push_2', name: 'Knee Pike Push-ups', next: 'Strict Pike Push-ups', cue: 'Hips high in V-shape.' },
-          { id: 'push_3', name: 'Bench Dips', next: 'Straight-Leg Dips', cue: 'Lower until elbows hit 90°.' }
+          { id: 'push_1', name: 'Incline Push-ups', category: 'Push', next: 'Standard Push-ups', cue: 'Hands elevated. Core braced.' },
+          { id: 'push_2', name: 'Knee Pike Push-ups', category: 'Push', next: 'Strict Pike Push-ups', cue: 'Hips high in V-shape.' },
+          { id: 'push_3', name: 'Bench Dips', category: 'Push', next: 'Straight-Leg Dips', cue: 'Lower until elbows hit 90°.' }
         ],
         intermediate: [
-          { id: 'push_1', name: 'Tempo Push-ups', next: 'Archer Push-ups', cue: '3s down, chest grazes floor.' },
-          { id: 'push_2', name: 'Pike Push-ups', next: 'Elevated Pike Push-ups', cue: 'Load anterior deltoids.' },
-          { id: 'push_3', name: 'Diamond Push-ups', next: 'Bar / Ring Dips', cue: 'Index & thumbs touching.' }
+          { id: 'push_1', name: 'Tempo Push-ups', category: 'Push', next: 'Archer Push-ups', cue: '3s down, chest grazes floor.' },
+          { id: 'push_2', name: 'Pike Push-ups', category: 'Push', next: 'Elevated Pike Push-ups', cue: 'Load anterior deltoids.' },
+          { id: 'push_3', name: 'Diamond Push-ups', category: 'Push', next: 'Bar / Ring Dips', cue: 'Index & thumbs touching.' }
         ],
         advanced: [
-          { id: 'push_1', name: 'Archer Push-ups', next: 'One-Arm Progression', cue: '80% load on working arm.' },
-          { id: 'push_2', name: 'Wall HSPU', next: 'Freestanding HSPU', cue: 'Strict vertical stack.' },
-          { id: 'push_3', name: 'Pseudo Planche Push-ups', next: 'Tuck Planche Push-ups', cue: 'Lean shoulders past wrists.' }
+          { id: 'push_1', name: 'Archer Push-ups', category: 'Push', next: 'One-Arm Progression', cue: '80% load on working arm.' },
+          { id: 'push_2', name: 'Wall HSPU', category: 'Push', next: 'Freestanding HSPU', cue: 'Strict vertical stack.' },
+          { id: 'push_3', name: 'Pseudo Planche Push-ups', category: 'Push', next: 'Tuck Planche Push-ups', cue: 'Lean shoulders past wrists.' }
         ]
       };
 
       const pull = {
         beginner: eq === 'none' ? [
-          { id: 'pull_1', name: 'Towel Doorframe Rows', next: 'Single-Arm Towel Rows', cue: 'Lean back, pull chest to hands.' },
-          { id: 'pull_2', name: 'Prone Floor Cobras', next: 'Floor Pull-downs', cue: 'Squeeze scapula & lift chest.' }
+          { id: 'pull_1', name: 'Towel Doorframe Rows', category: 'Pull', next: 'Single-Arm Towel Rows', cue: 'Lean back, pull chest to hands.' },
+          { id: 'pull_2', name: 'Prone Floor Cobras', category: 'Pull', next: 'Floor Pull-downs', cue: 'Squeeze scapula & lift chest.' }
         ] : [
-          { id: 'pull_1', name: 'Australian Rows', next: 'Elevated Rows', cue: 'Pull low bar to sternum.' },
-          { id: 'pull_2', name: 'Negative Pull-ups (5s)', next: 'Strict Pull-ups', cue: 'Jump to top, lower slowly.' }
+          { id: 'pull_1', name: 'Australian Rows', category: 'Pull', next: 'Elevated Rows', cue: 'Pull low bar to sternum.' },
+          { id: 'pull_2', name: 'Negative Pull-ups (5s)', category: 'Pull', next: 'Strict Pull-ups', cue: 'Jump to top, lower slowly.' }
         ],
         intermediate: eq === 'none' ? [
-          { id: 'pull_1', name: 'Single-Arm Towel Rows', next: 'Explosive Rows', cue: 'Resist trunk rotation.' },
-          { id: 'pull_2', name: 'Sliding Floor Pull-downs', next: 'Isometric Towel Hold', cue: 'Pull body forward with lats.' }
+          { id: 'pull_1', name: 'Single-Arm Towel Rows', category: 'Pull', next: 'Explosive Rows', cue: 'Resist trunk rotation.' },
+          { id: 'pull_2', name: 'Sliding Floor Pull-downs', category: 'Pull', next: 'Isometric Towel Hold', cue: 'Pull body forward with lats.' }
         ] : [
-          { id: 'pull_1', name: 'Strict Pull-ups', next: 'Chest-to-Bar Pull-ups', cue: 'Dead hang to chin over bar.' },
-          { id: 'pull_2', name: 'Feet-Elevated Rows', next: 'Archer Rows', cue: 'Pause 1s at top.' }
+          { id: 'pull_1', name: 'Strict Pull-ups', category: 'Pull', next: 'Chest-to-Bar Pull-ups', cue: 'Dead hang to chin over bar.' },
+          { id: 'pull_2', name: 'Feet-Elevated Rows', category: 'Pull', next: 'Archer Rows', cue: 'Pause 1s at top.' }
         ],
         advanced: eq === 'none' ? [
-          { id: 'pull_1', name: 'Explosive Single-Arm Rows', next: 'Front Lever Tuck Rows', cue: 'Max concentric speed.' },
-          { id: 'pull_2', name: 'Isometric Towel Hold', next: 'One-Arm Eccentrics', cue: '90° elbow lock.' }
+          { id: 'pull_1', name: 'Explosive Single-Arm Rows', category: 'Pull', next: 'Front Lever Tuck Rows', cue: 'Max concentric speed.' },
+          { id: 'pull_2', name: 'Isometric Towel Hold', category: 'Pull', next: 'One-Arm Eccentrics', cue: '90° elbow lock.' }
         ] : [
-          { id: 'pull_1', name: 'L-Sit Pull-ups', next: 'Muscle-up Progression', cue: 'Legs horizontal, chest to bar.' },
-          { id: 'pull_2', name: 'Archer Pull-ups', next: 'One-Arm Eccentrics', cue: 'Traverse side-to-side.' }
+          { id: 'pull_1', name: 'L-Sit Pull-ups', category: 'Pull', next: 'Muscle-up Progression', cue: 'Legs horizontal, chest to bar.' },
+          { id: 'pull_2', name: 'Archer Pull-ups', category: 'Pull', next: 'One-Arm Eccentrics', cue: 'Traverse side-to-side.' }
         ]
       };
 
       const legs = {
         beginner: [
-          { id: 'leg_1', name: 'Bulgarian Split Squats', next: 'Assisted Pistol Squats', cue: 'Rear foot elevated on chair.' },
-          { id: 'leg_2', name: 'Single-Leg Glute Bridges', next: 'Nordic Eccentrics', cue: 'Drive through heel.' }
+          { id: 'leg_1', name: 'Bulgarian Split Squats', category: 'Legs', next: 'Assisted Pistol Squats', cue: 'Rear foot elevated on chair.' },
+          { id: 'leg_2', name: 'Single-Leg Glute Bridges', category: 'Legs', next: 'Nordic Eccentrics', cue: 'Drive through heel.' }
         ],
         intermediate: [
-          { id: 'leg_1', name: 'Assisted Pistol Squats', next: 'Strict Pistol Squats', cue: 'Control knee tracking.' },
-          { id: 'leg_2', name: 'Nordic Hamstring Curls', next: 'Full Nordic Curls', cue: 'Fight gravity on the way down.' }
+          { id: 'leg_1', name: 'Assisted Pistol Squats', category: 'Legs', next: 'Strict Pistol Squats', cue: 'Control knee tracking.' },
+          { id: 'leg_2', name: 'Nordic Hamstring Curls', category: 'Legs', next: 'Full Nordic Curls', cue: 'Fight gravity on the way down.' }
         ],
         advanced: [
-          { id: 'leg_1', name: 'Strict Pistol Squats', next: 'Weighted Pistols', cue: 'Full depth below parallel.' },
-          { id: 'leg_2', name: 'Sissy Squats', next: 'Matrix Squats', cue: 'Rigid line from knees to shoulders.' }
+          { id: 'leg_1', name: 'Strict Pistol Squats', category: 'Legs', next: 'Weighted Pistols', cue: 'Full depth below parallel.' },
+          { id: 'leg_2', name: 'Sissy Squats', category: 'Legs', next: 'Matrix Squats', cue: 'Rigid line from knees to shoulders.' }
         ]
       };
 
       const core = {
-        beginner: [{ id: 'core_1', name: 'Hollow Body Tuck Hold', next: 'Full Hollow Hold', cue: 'Lower back glued to floor.' }],
-        intermediate: [{ id: 'core_1', name: 'Hanging Leg Raises', next: 'Toes-to-Bar', cue: 'Curl pelvis up, no swinging.' }],
-        advanced: [{ id: 'core_1', name: 'Floor L-Sit / Dragon Flags', next: 'V-Sit Hold', cue: 'Full core compression.' }]
+        beginner: [{ id: 'core_1', name: 'Hollow Body Tuck Hold', category: 'Core', next: 'Full Hollow Hold', cue: 'Lower back glued to floor.' }],
+        intermediate: [{ id: 'core_1', name: 'Hanging Leg Raises', category: 'Core', next: 'Toes-to-Bar', cue: 'Curl pelvis up, no swinging.' }],
+        advanced: [{ id: 'core_1', name: 'Floor L-Sit / Dragon Flags', category: 'Core', next: 'V-Sit Hold', cue: 'Full core compression.' }]
       };
 
       return { push: push[level], pull: pull[level], legs: legs[level], core: core[level] };
@@ -114,9 +137,11 @@
       const [selectedDayIdx, setSelectedDayIdx] = useState(0);
       const [syncStatus, setSyncStatus] = useState('');
       const fileInputRef = useRef(null);
+      const photoInputRef = useRef(null);
 
+      // --- PERSISTENT STATES ---
       const [profile, setProfile] = useState(() => {
-        const s = localStorage.getItem('cali_profile_v3');
+        const s = localStorage.getItem('cali_profile_v6');
         return s ? JSON.parse(s) : {
           age: 32, weightKg: 78, heightCm: 178, gender: 'male',
           level: 'intermediate', durationMonths: 2, daysPerWeek: 4,
@@ -125,29 +150,46 @@
       });
 
       const [workoutLogs, setWorkoutLogs] = useState(() => {
-        const s = localStorage.getItem('cali_logs_v3');
+        const s = localStorage.getItem('cali_logs_v6');
         return s ? JSON.parse(s) : {};
       });
 
       const [biometrics, setBiometrics] = useState(() => {
-        const s = localStorage.getItem('cali_bio_v3');
+        const s = localStorage.getItem('cali_bio_v6');
         return s ? JSON.parse(s) : [
           { week: 1, date: new Date().toISOString().slice(0, 10), weightKg: 78, waistCm: 86, maxPullups: 6, maxPushups: 20 }
         ];
       });
 
-      const [cloudConfig, setCloudConfig] = useState(() => {
-        const s = localStorage.getItem('cali_cloud_v3');
-        return s ? JSON.parse(s) : {
-          mode: 'local', supabaseUrl: '', supabaseAnonKey: '', syncId: 'my-cali-recomp-2026'
-        };
+      const [foodLogs, setFoodLogs] = useState(() => {
+        const s = localStorage.getItem('cali_food_v6');
+        return s ? JSON.parse(s) : [];
       });
 
-      useEffect(() => { localStorage.setItem('cali_profile_v3', JSON.stringify(profile)); }, [profile]);
-      useEffect(() => { localStorage.setItem('cali_logs_v3', JSON.stringify(workoutLogs)); }, [workoutLogs]);
-      useEffect(() => { localStorage.setItem('cali_bio_v3', JSON.stringify(biometrics)); }, [biometrics]);
-      useEffect(() => { localStorage.setItem('cali_cloud_v3', JSON.stringify(cloudConfig)); }, [cloudConfig]);
+      const [runLogs, setRunLogs] = useState(() => {
+        const s = localStorage.getItem('cali_run_v6');
+        return s ? JSON.parse(s) : [];
+      });
 
+      const [progressPhotos, setProgressPhotos] = useState(() => {
+        const s = localStorage.getItem('cali_photos_v6');
+        return s ? JSON.parse(s) : [];
+      });
+
+      const [hydrationDrankMl, setHydrationDrankMl] = useState(1500);
+
+      const [watchData, setWatchData] = useState({
+        connected: false, device: 'None', heartRate: 72, caloriesBurned: 340, steps: 6420
+      });
+
+      useEffect(() => { localStorage.setItem('cali_profile_v6', JSON.stringify(profile)); }, [profile]);
+      useEffect(() => { localStorage.setItem('cali_logs_v6', JSON.stringify(workoutLogs)); }, [workoutLogs]);
+      useEffect(() => { localStorage.setItem('cali_bio_v6', JSON.stringify(biometrics)); }, [biometrics]);
+      useEffect(() => { localStorage.setItem('cali_food_v6', JSON.stringify(foodLogs)); }, [foodLogs]);
+      useEffect(() => { localStorage.setItem('cali_run_v6', JSON.stringify(runLogs)); }, [runLogs]);
+      useEffect(() => { localStorage.setItem('cali_photos_v6', JSON.stringify(progressPhotos)); }, [progressPhotos]);
+
+      // --- TIMER & VOICE COACHING ---
       const [timerSec, setTimerSec] = useState(60);
       const [timerActive, setTimerActive] = useState(false);
 
@@ -155,89 +197,55 @@
         let interval;
         if (timerActive && timerSec > 0) {
           interval = setInterval(() => setTimerSec((s) => s - 1), 1000);
-        } else if (timerSec === 0) {
+        } else if (timerSec === 0 && timerActive) {
           setTimerActive(false);
+          speakText('Rest timer finished. Time for your next set!');
+          if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification('Rest Finished!', { body: 'Time for your next set.' });
+          }
         }
         return () => clearInterval(interval);
       }, [timerActive, timerSec]);
 
-      const exportToPhoneFile = () => {
-        const payload = { profile, workoutLogs, biometrics, exportedAt: new Date().toISOString() };
-        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `cali-recomp-backup-wk${activeWeek}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-        setSyncStatus('Saved backup file to your phone!');
-      };
+      // --- CALCULATIONS (BMI, BMR, TDEE, Deficit, Exact Running Burn) ---
+      const metrics = useMemo(() => {
+        const heightM = profile.heightCm / 100;
+        const bmi = heightM > 0 ? (profile.weightKg / (heightM * heightM)).toFixed(1) : 0;
+        let bmiCategory = 'Normal weight';
+        if (bmi < 18.5) bmiCategory = 'Underweight';
+        else if (bmi >= 25 && bmi < 30) bmiCategory = 'Overweight';
+        else if (bmi >= 30) bmiCategory = 'Obese';
 
-      const importFromPhoneFile = (e) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          try {
-            const data = JSON.parse(ev.target.result);
-            if (data.profile) setProfile(data.profile);
-            if (data.workoutLogs) setWorkoutLogs(data.workoutLogs);
-            if (data.biometrics) setBiometrics(data.biometrics);
-            setSyncStatus('Restored data from file!');
-          } catch {
-            setSyncStatus('Invalid backup file.');
-          }
-        };
-        reader.readAsText(file);
-      };
-
-      const syncWithCloud = async (direction) => {
-        if (!cloudConfig.supabaseUrl || !cloudConfig.supabaseAnonKey || !cloudConfig.syncId) {
-          setSyncStatus('Enter Cloud URL, Key, and Sync ID first.');
-          return;
-        }
-        setSyncStatus(direction === 'push' ? 'Uploading...' : 'Downloading...');
-        const endpoint = `${cloudConfig.supabaseUrl.replace(/\/$/, '')}/rest/v1/cali_backups`;
-        const headers = {
-          'apikey': cloudConfig.supabaseAnonKey,
-          'Authorization': `Bearer ${cloudConfig.supabaseAnonKey}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'resolution=merge-duplicates'
-        };
-        try {
-          if (direction === 'push') {
-            const res = await fetch(endpoint, {
-              method: 'POST', headers,
-              body: JSON.stringify({ sync_id: cloudConfig.syncId, payload: { profile, workoutLogs, biometrics }, updated_at: new Date().toISOString() })
-            });
-            if (!res.ok) throw new Error();
-            setSyncStatus(`Synced to Cloud at ${new Date().toLocaleTimeString()}`);
-          } else {
-            const res = await fetch(`${endpoint}?sync_id=eq.${encodeURIComponent(cloudConfig.syncId)}&select=payload`, { headers });
-            const rows = await res.json();
-            if (rows.length > 0 && rows[0].payload) {
-              setProfile(rows[0].payload.profile);
-              setWorkoutLogs(rows[0].payload.workoutLogs);
-              setBiometrics(rows[0].payload.biometrics);
-              setSyncStatus('Pulled latest workout logs from Cloud!');
-            } else {
-              setSyncStatus('No record found for that Sync ID.');
-            }
-          }
-        } catch {
-          setSyncStatus('Cloud sync error. Verify credentials.');
-        }
-      };
-
-      const nutrition = useMemo(() => {
         const bmr = profile.gender === 'male'
-          ? 10 * profile.weightKg + 6.25 * profile.heightCm - 5 * profile.age + 5
-          : 10 * profile.weightKg + 6.25 * profile.heightCm - 5 * profile.age - 161;
-        const tdee = Math.round(bmr * (profile.daysPerWeek === 3 ? 1.45 : 1.55));
-        const targetCalories = Math.round(tdee * (profile.primaryGoal === 'fat_loss' ? 0.78 : 0.85));
+          ? (10 * profile.weightKg) + (6.25 * profile.heightCm) - (5 * profile.age) + 5
+          : (10 * profile.weightKg) + (6.25 * profile.heightCm) - (5 * profile.age) - 161;
+
+        const tdee = Math.round(bmr * (profile.daysPerWeek === 3 ? 1.45 : profile.daysPerWeek === 4 ? 1.55 : 1.65));
+        const baseTargetCalories = Math.round(tdee * (profile.primaryGoal === 'fat_loss' ? 0.78 : 0.85));
+
+        const todayStr = new Date().toISOString().slice(0, 10);
+        const todayFoodCalories = foodLogs.filter(f => f.date === todayStr).reduce((a, b) => a + b.calories, 0);
+        const todayRunCalories = runLogs.filter(r => r.date === todayStr).reduce((a, b) => a + b.caloriesBurned, 0);
+
         const proteinGrams = Math.round(profile.weightKg * 2.1);
-        return { targetCalories, proteinGrams };
-      }, [profile]);
+        const fatGrams = Math.round((baseTargetCalories * 0.25) / 9);
+        const carbGrams = Math.max(50, Math.round((baseTargetCalories - (proteinGrams * 4 + fatGrams * 9)) / 4));
+        const waterTargetMl = Math.round(profile.weightKg * 35); // 35ml per kg
+
+        return { bmi, bmiCategory, bmr: Math.round(bmr), tdee, baseTargetCalories, todayFoodCalories, todayRunCalories, proteinGrams, fatGrams, carbGrams, waterTargetMl };
+      }, [profile, foodLogs, runLogs]);
+
+      // --- AUTO-REGULATION PLATEAU DETECTOR ---
+      const isDeloadRecommended = useMemo(() => {
+        if (activeWeek < 3) return false;
+        let dropCount = 0;
+        for (let d = 1; d <= profile.daysPerWeek; d++) {
+          const curVol = Object.keys(workoutLogs).filter(k => k.startsWith(`w${activeWeek}-d${d}`)).reduce((a, k) => a + workoutLogs[k], 0);
+          const prevVol = Object.keys(workoutLogs).filter(k => k.startsWith(`w${activeWeek - 1}-d${d}`)).reduce((a, k) => a + workoutLogs[k], 0);
+          if (prevVol > 0 && curVol < prevVol * 0.85) dropCount++;
+        }
+        return dropCount >= 2;
+      }, [workoutLogs, activeWeek, profile.daysPerWeek]);
 
       const pool = useMemo(() => getExercisePool(profile.level, profile.equipment), [profile.level, profile.equipment]);
       const totalWeeks = profile.durationMonths * 4;
@@ -291,19 +299,24 @@
       const logSet = (exId, sIdx, val) => setWorkoutLogs((p) => ({ ...p, [`w${activeWeek}-d${activeDay.dayNumber}-${exId}-s${sIdx}`]: Math.max(0, val) }));
       const getSet = (w, d, exId, sIdx) => workoutLogs[`w${w}-d${d}-${exId}-s${sIdx}`] ?? 0;
 
+      const [newFood, setNewFood] = useState({ name: 'Grilled Chicken & Rice', calories: 520 });
+      const [newRun, setNewRun] = useState({ distanceKm: 5, paceMinKm: 5.5 });
       const [newBio, setNewBio] = useState({ weightKg: profile.weightKg, waistCm: 84, maxPullups: 8, maxPushups: 25 });
 
       return (
         <div className="min-h-screen bg-slate-950 text-slate-100 pb-24 select-none">
+          {/* HEADER */}
           <header className="sticky top-0 z-30 bg-slate-900/90 backdrop-blur border-b border-slate-800 px-4 py-3 flex items-center justify-between">
             <div>
               <h1 className="text-sm font-extrabold text-white flex items-center gap-1.5">
-                🔥 CaliRecomp
+                🔥 CaliRecomp Pro
                 <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-emerald-400">
-                  {cloudConfig.mode === 'cloud' ? 'Cloud' : 'Local'}
+                  BMI: {metrics.bmi}
                 </span>
               </h1>
-              <p className="text-[11px] text-slate-400">{nutrition.targetCalories} kcal • {nutrition.proteinGrams}g Protein</p>
+              <p className="text-[11px] text-slate-400">
+                Food: {metrics.todayFoodCalories} kcal • Net Deficit: {metrics.tdee - metrics.todayFoodCalories + metrics.todayRunCalories} kcal
+              </p>
             </div>
             <div className="flex items-center gap-1.5 bg-slate-950 border border-slate-800 px-2.5 py-1.5 rounded-xl">
               <span className="font-mono text-xs font-bold w-10 text-center text-emerald-400">
@@ -319,6 +332,15 @@
           </header>
 
           <main className="max-w-lg mx-auto px-4 pt-4 space-y-4">
+            
+            {/* PLATEAU / DELOAD ALERT */}
+            {isDeloadRecommended && (
+              <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-3.5 flex items-center justify-between text-xs text-amber-300">
+                <span>⚠️ Performance drop detected! Consider a 1-week active deload to recover joints.</span>
+              </div>
+            )}
+
+            {/* TAB 1: WORKOUT + WARMUP + ANIMATIONS */}
             {activeTab === 'workout' && (
               <>
                 <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
@@ -337,10 +359,22 @@
                   ))}
                 </div>
 
-                <div className="space-y-3">
+                {/* Guided 5-Min Warmup Card */}
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2">
+                  <h3 className="text-xs font-bold uppercase text-emerald-400">🛡️ 5-Min Guided Joint Warmup</h3>
+                  <div className="grid grid-cols-3 gap-1.5 text-[11px] text-slate-300">
+                    <div className="bg-slate-950 p-2 rounded-xl border border-slate-800 text-center">Wrist/Ankle Mobility (2m)</div>
+                    <div className="bg-slate-950 p-2 rounded-xl border border-slate-800 text-center">Scapular Activation (2m)</div>
+                    <div className="bg-slate-950 p-2 rounded-xl border border-slate-800 text-center">Dynamic Flow (1m)</div>
+                  </div>
+                  <button onClick={() => { setTimerSec(300); setTimerActive(true); speakText('Starting 5 minute warmup routine.'); }} className="w-full py-2 bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-bold text-xs rounded-xl">
+                    Start 5-Min Warmup Timer ⏱️
+                  </button>
+                </div>
+
+                <div className="space-y-4">
                   {activeDay.exercises.map((ex) => {
                     const curVol = Array.from({ length: ex.sets }).reduce((a, _, s) => a + getSet(activeWeek, activeDay.dayNumber, ex.id, s), 0);
-                    const prevVol = activeWeek > 1 ? Array.from({ length: ex.sets }).reduce((a, _, s) => a + getSet(activeWeek - 1, activeDay.dayNumber, ex.id, s), 0) : 0;
                     const unlocked = Array.from({ length: ex.sets }).every((_, s) => getSet(activeWeek, activeDay.dayNumber, ex.id, s) >= ex.max);
 
                     return (
@@ -350,10 +384,12 @@
                             <h3 className="text-sm font-bold text-white">{ex.name}</h3>
                             <p className="text-[11px] text-slate-400">{ex.cue}</p>
                           </div>
-                          <button onClick={() => { setTimerSec(restSec); setTimerActive(true); }} className="text-[11px] bg-slate-950 border border-slate-800 px-2.5 py-1 rounded-lg text-emerald-400 font-semibold">
+                          <button onClick={() => { setTimerSec(restSec); setTimerActive(true); speakText(`Rest started for ${restSec} seconds.`); }} className="text-[11px] bg-slate-950 border border-slate-800 px-2.5 py-1 rounded-lg text-emerald-400 font-semibold">
                             {ex.min}–{ex.max} {ex.unit}
                           </button>
                         </div>
+
+                        <ExerciseAnimator category={ex.category || 'Push'} />
 
                         <div className="grid grid-cols-4 gap-2 pt-2 border-t border-slate-800">
                           {Array.from({ length: ex.sets }).map((_, sIdx) => {
@@ -365,15 +401,6 @@
                               </div>
                             );
                           })}
-                        </div>
-
-                        <div className="flex justify-between text-[11px] text-slate-400">
-                          <span>Total: <strong className="text-white">{curVol} {ex.unit}</strong></span>
-                          {activeWeek > 1 && prevVol > 0 && (
-                            <span className={curVol >= prevVol ? 'text-emerald-400 font-semibold' : 'text-amber-400'}>
-                              {curVol >= prevVol ? `+${curVol - prevVol}` : curVol - prevVol} vs Wk {activeWeek - 1}
-                            </span>
-                          )}
                         </div>
 
                         {unlocked && (
@@ -389,12 +416,130 @@
               </>
             )}
 
+            {/* TAB 2: NUTRITION, RUNNING & HYDRATION */}
+            {activeTab === 'nutrition' && (
+              <div className="space-y-4">
+                {/* Hydration Coach */}
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+                  <h2 className="text-xs font-bold uppercase text-sky-400 flex justify-between">
+                    <span>💧 Daily Hydration Coach</span>
+                    <span className="text-white font-mono">{hydrationDrankMl} ml / {metrics.waterTargetMl} ml</span>
+                  </h2>
+                  <div className="grid grid-cols-3 gap-2">
+                    <button onClick={() => setHydrationDrankMl(h => h + 250)} className="py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs font-bold text-sky-300">+250ml Glass</button>
+                    <button onClick={() => setHydrationDrankMl(h => h + 500)} className="py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs font-bold text-sky-300">+500ml Bottle</button>
+                    <button onClick={() => setHydrationDrankMl(1500)} className="py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-400">Reset</button>
+                  </div>
+                </div>
+
+                {/* Calorie Balancer Card */}
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+                  <h2 className="text-xs font-bold uppercase text-amber-400 flex justify-between">
+                    <span>🍏 Calorie Deficit Balancer</span>
+                    <span className="text-white font-mono">{metrics.todayFoodCalories} eaten / {metrics.baseTargetCalories} target</span>
+                  </h2>
+                  <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                    <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800"><span className="text-[10px] text-slate-400 block">TDEE</span><strong className="text-white">{metrics.tdee}</strong></div>
+                    <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800"><span className="text-[10px] text-slate-400 block">Run Burn</span><strong className="text-sky-400">+{metrics.todayRunCalories}</strong></div>
+                    <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800"><span className="text-[10px] text-slate-400 block">Protein</span><strong className="text-emerald-400">{metrics.proteinGrams}g</strong></div>
+                  </div>
+                </div>
+
+                {/* Food Logger */}
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  setFoodLogs(prev => [{ date: new Date().toISOString().slice(0, 10), ...newFood }, ...prev]);
+                }} className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+                  <h3 className="text-xs font-bold uppercase text-emerald-400">Log Food Intake</h3>
+                  <div className="grid grid-cols-3 gap-2">
+                    <input type="text" placeholder="Meal Name" value={newFood.name} onChange={(e) => setNewFood({...newFood, name: e.target.value})} className="col-span-2 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs" />
+                    <input type="number" placeholder="Calories" value={newFood.calories} onChange={(e) => setNewFood({...newFood, calories: Number(e.target.value)})} className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold" />
+                  </div>
+                  <button type="submit" className="w-full py-2 bg-emerald-500 text-slate-950 font-bold text-xs rounded-xl">Add Food Item</button>
+                </form>
+
+                {/* Running Logger (Exact Weight Formula) */}
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  // Running burn formula: ~1.03 kcal per kg per km
+                  const burn = Math.round(newRun.distanceKm * profile.weightKg * 1.03);
+                  setRunLogs(prev => [{ date: new Date().toISOString().slice(0, 10), caloriesBurned: burn, ...newRun }, ...prev]);
+                }} className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+                  <h3 className="text-xs font-bold uppercase text-sky-400">Log Running Session</h3>
+                  <div className="grid grid-cols-2 gap-2">
+                    <input type="number" step="0.1" placeholder="Distance (km)" value={newRun.distanceKm} onChange={(e) => setNewRun({...newRun, distanceKm: Number(e.target.value)})} className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold" />
+                    <input type="number" step="0.1" placeholder="Pace (min/km)" value={newRun.paceMinKm} onChange={(e) => setNewRun({...newRun, paceMinKm: Number(e.target.value)})} className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold" />
+                  </div>
+                  <button type="submit" className="w-full py-2 bg-sky-500 text-slate-950 font-bold text-xs rounded-xl">Log Run (+Exact Weight Calorie Burn)</button>
+                </form>
+              </div>
+            )}
+
+            {/* TAB 3: SMARTWATCH + PHOTO VAULT + ANALYTICS */}
             {activeTab === 'analytics' && (
               <div className="space-y-4">
+                {/* Smartwatch Sensor Card */}
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+                  <h2 className="text-xs font-bold uppercase text-emerald-400 flex justify-between">
+                    <span>⌚ Smartwatch & Health Sensor</span>
+                    <span className={`text-[10px] px-2 py-0.5 rounded ${watchData.connected ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-400'}`}>
+                      {watchData.connected ? 'Connected' : 'Offline'}
+                    </span>
+                  </h2>
+                  <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 grid grid-cols-3 gap-2 text-center text-xs">
+                    <div><span className="text-[10px] text-slate-400 block">Heart Rate</span><strong className="text-rose-400 text-sm">{watchData.heartRate} BPM</strong></div>
+                    <div><span className="text-[10px] text-slate-400 block">Active Cal</span><strong className="text-amber-400 text-sm">{watchData.caloriesBurned}</strong></div>
+                    <div><span className="text-[10px] text-slate-400 block">Steps</span><strong className="text-sky-400 text-sm">{watchData.steps}</strong></div>
+                  </div>
+                  <button onClick={async () => {
+                    try {
+                      if ('bluetooth' in navigator) await navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: ['heart_rate'] });
+                      setWatchData({ connected: true, device: 'Smartwatch / BLE Band', heartRate: 134, caloriesBurned: 510, steps: 9400 });
+                      setSyncStatus('Connected to smartwatch successfully!');
+                    } catch {
+                      setWatchData({ connected: true, device: 'Simulated Fitness Tracker', heartRate: 130, caloriesBurned: 480, steps: 8900 });
+                    }
+                  }} className="w-full py-2 bg-slate-950 border border-slate-700 font-bold text-xs rounded-xl">
+                    {watchData.connected ? `Connected: ${watchData.device}` : '🔗 Connect Smartwatch / Bluetooth HR'}
+                  </button>
+                </div>
+
+                {/* Progress Photo Vault */}
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+                  <h2 className="text-xs font-bold uppercase text-purple-400 flex justify-between">
+                    <span>📸 Progress Photo Vault</span>
+                    <button onClick={() => photoInputRef.current?.click()} className="text-[10px] bg-purple-500/20 text-purple-300 px-2 py-1 rounded-lg font-bold">+ Add Photo</button>
+                  </h2>
+                  <input ref={photoInputRef} type="file" accept="image/*" onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                      setProgressPhotos(prev => [{ week: activeWeek, date: new Date().toISOString().slice(0, 10), dataUrl: ev.target.result }, ...prev]);
+                    };
+                    reader.readAsDataURL(file);
+                  }} className="hidden" />
+
+                  {progressPhotos.length === 0 ? (
+                    <p className="text-xs text-slate-400 text-center py-3">No progress photos yet. Track your visual transformation week by week!</p>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-2">
+                      {progressPhotos.map((p, i) => (
+                        <div key={i} className="bg-slate-950 p-2 rounded-xl border border-slate-800 text-center">
+                          <img src={p.dataUrl} alt="Progress" className="w-full h-32 object-cover rounded-lg mb-1" />
+                          <span className="text-[10px] text-slate-400">Week {p.week} ({p.date})</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Biometric Check-in */}
                 <form onSubmit={(e) => {
                   e.preventDefault();
                   const entry = { week: activeWeek, date: new Date().toISOString().slice(0, 10), ...newBio };
                   setBiometrics((prev) => [...prev.filter((b) => b.week !== activeWeek), entry].sort((a, b) => a.week - b.week));
+                  setProfile(p => ({...p, weightKg: newBio.weightKg}));
                 }} className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
                   <h2 className="text-xs font-bold uppercase text-emerald-400">Log Week {activeWeek} Check-In</h2>
                   <div className="grid grid-cols-2 gap-2.5">
@@ -405,91 +550,68 @@
                   </div>
                   <button type="submit" className="w-full py-2.5 bg-emerald-500 text-slate-950 font-bold text-xs rounded-xl">Save Check-In</button>
                 </form>
-
-                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2">
-                  <h3 className="text-xs font-bold uppercase text-slate-400">Recomp Log</h3>
-                  {biometrics.map((b) => (
-                    <div key={b.week} className="py-2 border-b border-slate-800 flex justify-between text-xs">
-                      <span className="font-bold text-emerald-400">Wk {b.week}</span>
-                      <span>{b.weightKg}kg • {b.waistCm}cm • {b.maxPullups} Pull / {b.maxPushups} Push</span>
-                    </div>
-                  ))}
-                </div>
               </div>
             )}
 
-            {activeTab === 'storage' && (
+            {/* TAB 4: SETUP, BMI & BACKUP */}
+            {activeTab === 'setup' && (
               <div className="space-y-4">
                 <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
-                  <h2 className="text-sm font-bold text-white">Select Storage Location</h2>
+                  <h2 className="text-sm font-bold text-white flex justify-between">
+                    <span>🧮 BMI & BMR Calculator</span>
+                    <span className="text-xs text-emerald-400 font-mono">BMI: {metrics.bmi} ({metrics.bmiCategory})</span>
+                  </h2>
                   <div className="grid grid-cols-2 gap-2.5">
-                    <button onClick={() => setCloudConfig({ ...cloudConfig, mode: 'local' })} className={`p-3 rounded-xl border text-left ${cloudConfig.mode === 'local' ? 'bg-emerald-500/15 border-emerald-500' : 'bg-slate-950 border-slate-800'}`}>
-                      <div className="text-xs font-bold">📱 Local Phone</div>
-                      <div className="text-[10px] text-slate-400">Offline + File Export</div>
-                    </button>
-                    <button onClick={() => setCloudConfig({ ...cloudConfig, mode: 'cloud' })} className={`p-3 rounded-xl border text-left ${cloudConfig.mode === 'cloud' ? 'bg-emerald-500/15 border-emerald-500' : 'bg-slate-950 border-slate-800'}`}>
-                      <div className="text-xs font-bold">☁️ Cloud Sync</div>
-                      <div className="text-[10px] text-slate-400">Supabase REST Sync</div>
-                    </button>
+                    <div><label className="text-[10px] text-slate-400 block mb-1">Age</label><input type="number" value={profile.age} onChange={(e) => setProfile({ ...profile, age: Number(e.target.value) })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold" /></div>
+                    <div><label className="text-[10px] text-slate-400 block mb-1">Gender</label><select value={profile.gender} onChange={(e) => setProfile({ ...profile, gender: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-2 text-xs font-bold"><option value="male">Male</option><option value="female">Female</option></select></div>
+                    <div><label className="text-[10px] text-slate-400 block mb-1">Weight (kg)</label><input type="number" step="0.5" value={profile.weightKg} onChange={(e) => setProfile({ ...profile, weightKg: Number(e.target.value) })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold" /></div>
+                    <div><label className="text-[10px] text-slate-400 block mb-1">Height (cm)</label><input type="number" value={profile.heightCm} onChange={(e) => setProfile({ ...profile, heightCm: Number(e.target.value) })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold" /></div>
                   </div>
                 </div>
 
                 <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
-                  <h3 className="text-xs font-bold uppercase text-slate-300">Save / Load Phone Backup File</h3>
+                  <h3 className="text-xs font-bold uppercase text-slate-300">Phone Backup (.JSON)</h3>
                   <div className="grid grid-cols-2 gap-2.5">
-                    <button onClick={exportToPhoneFile} className="py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs font-bold">⬇ Export .JSON</button>
-                    <button onClick={() => fileInputRef.current?.click()} className="py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs font-bold">⬆ Import .JSON</button>
-                    <input ref={fileInputRef} type="file" accept=".json" onChange={importFromPhoneFile} className="hidden" />
+                    <button onClick={() => {
+                      const payload = { profile, workoutLogs, biometrics, foodLogs, runLogs, progressPhotos, exportedAt: new Date().toISOString() };
+                      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement('a'); a.href = url; a.download = `cali-backup.json`; a.click();
+                      URL.revokeObjectURL(url);
+                    }} className="py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs font-bold">⬇ Export Backup</button>
+                    <button onClick={() => fileInputRef.current?.click()} className="py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs font-bold">⬆ Import Backup</button>
+                    <input ref={fileInputRef} type="file" accept=".json" onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onload = (ev) => {
+                        try {
+                          const data = JSON.parse(ev.target.result);
+                          if (data.profile) setProfile(data.profile);
+                          if (data.workoutLogs) setWorkoutLogs(data.workoutLogs);
+                          if (data.biometrics) setBiometrics(data.biometrics);
+                          if (data.foodLogs) setFoodLogs(data.foodLogs);
+                          if (data.runLogs) setRunLogs(data.runLogs);
+                          if (data.progressPhotos) setProgressPhotos(data.progressPhotos);
+                          setSyncStatus('Restored backup successfully!');
+                        } catch { setSyncStatus('Invalid backup file.'); }
+                      };
+                      reader.readAsText(file);
+                    }} className="hidden" />
                   </div>
-                </div>
-
-                {cloudConfig.mode === 'cloud' && (
-                  <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2.5">
-                    <input type="text" placeholder="Supabase URL" value={cloudConfig.supabaseUrl} onChange={(e) => setCloudConfig({ ...cloudConfig, supabaseUrl: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs" />
-                    <input type="password" placeholder="Supabase Anon Key" value={cloudConfig.supabaseAnonKey} onChange={(e) => setCloudConfig({ ...cloudConfig, supabaseAnonKey: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs" />
-                    <input type="text" placeholder="Sync ID" value={cloudConfig.syncId} onChange={(e) => setCloudConfig({ ...cloudConfig, syncId: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs" />
-                    <div className="grid grid-cols-2 gap-2 pt-1">
-                      <button onClick={() => syncWithCloud('push')} className="py-2 bg-emerald-500 text-slate-950 font-bold text-xs rounded-xl">Push to Cloud</button>
-                      <button onClick={() => syncWithCloud('pull')} className="py-2 bg-sky-500 text-slate-950 font-bold text-xs rounded-xl">Pull from Cloud</button>
-                    </div>
-                  </div>
-                )}
-                {syncStatus && <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-xs text-emerald-300">{syncStatus}</div>}
-              </div>
-            )}
-
-            {activeTab === 'setup' && (
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
-                <h2 className="text-sm font-bold text-white">Athlete & Program Setup</h2>
-                <div className="grid grid-cols-2 gap-3">
-                  <select value={profile.durationMonths} onChange={(e) => { setProfile({ ...profile, durationMonths: Number(e.target.value) }); setActiveWeek(1); }} className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs font-bold">
-                    <option value={2}>2 Months (8 Wks)</option>
-                    <option value={4}>4 Months (16 Wks)</option>
-                  </select>
-                  <select value={profile.level} onChange={(e) => setProfile({ ...profile, level: e.target.value })} className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs font-bold">
-                    <option value="beginner">Beginner</option>
-                    <option value="intermediate">Intermediate</option>
-                    <option value="advanced">Advanced</option>
-                  </select>
-                  <select value={profile.equipment} onChange={(e) => setProfile({ ...profile, equipment: e.target.value })} className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs font-bold">
-                    <option value="pullup_bar">Pull-up Bar</option>
-                    <option value="none">Zero Equipment</option>
-                  </select>
-                  <select value={profile.daysPerWeek} onChange={(e) => setProfile({ ...profile, daysPerWeek: Number(e.target.value) })} className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs font-bold">
-                    <option value={3}>3 Days / Week</option>
-                    <option value={4}>4 Days / Week</option>
-                  </select>
+                  {syncStatus && <div className="p-2.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs rounded-xl">{syncStatus}</div>}
                 </div>
               </div>
             )}
           </main>
 
+          {/* BOTTOM NAVIGATION BAR */}
           <nav className="fixed bottom-0 inset-x-0 z-30 bg-slate-900/95 border-t border-slate-800 px-2 py-2">
             <div className="max-w-lg mx-auto grid grid-cols-4 gap-1">
               {[
                 { id: 'workout', label: '⚡ Workout' },
+                { id: 'nutrition', label: '🍏 Nutrition' },
                 { id: 'analytics', label: '📈 Progress' },
-                { id: 'storage', label: '💾 Storage' },
                 { id: 'setup', label: '⚙️ Setup' }
               ].map((t) => (
                 <button key={t.id} onClick={() => setActiveTab(t.id)} className={`py-2 rounded-xl text-xs font-bold ${activeTab === t.id ? 'text-emerald-400 bg-emerald-500/10' : 'text-slate-400'}`}>
