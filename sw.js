@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cali-recomp-v1';
+const CACHE_NAME = 'cali-recomp-v8';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
