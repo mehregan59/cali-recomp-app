@@ -9,7 +9,7 @@ const speakText = (text) => {
   }
 };
 
-// --- FULL-COLOR HUMAN CHARACTER ANIMATOR (UNIQUE MOTION FOR EVERY EXERCISE) ---
+// --- MULTI-ANGLE HUMAN EXERCISE ANIMATOR (UNIQUE BIOMECHANICS PER EXERCISE) ---
 function ExerciseVisualCoach({ animType, name, steps }) {
   const canvasRef = useRef(null);
   const [showSteps, setShowSteps] = useState(false);
@@ -21,7 +21,6 @@ function ExerciseVisualCoach({ animType, name, steps }) {
     let animId;
     let t = 0;
 
-    // Helper to draw a thick, rounded human limb with skin/clothing colors
     const drawLimb = (x1, y1, x2, y2, thickness, color) => {
       ctx.beginPath();
       ctx.strokeStyle = color;
@@ -33,12 +32,10 @@ function ExerciseVisualCoach({ animType, name, steps }) {
     };
 
     const drawHead = (x, y, radius = 9) => {
-      // Skin head
       ctx.beginPath();
       ctx.fillStyle = '#f4a261';
       ctx.arc(x, y, radius, 0, Math.PI * 2);
       ctx.fill();
-      // Athletic hair/cap
       ctx.beginPath();
       ctx.fillStyle = '#1e293b';
       ctx.arc(x - 1, y - 2, radius, Math.PI, Math.PI * 2.1);
@@ -46,208 +43,233 @@ function ExerciseVisualCoach({ animType, name, steps }) {
     };
 
     const render = () => {
-      t += 0.045;
-      // Smooth 0 -> 1 -> 0 rep cycle
-      const rep = (Math.sin(t) + 1) / 2;
+      t += 0.04;
+      const rep = (Math.sin(t) + 1) / 2; // Smooth 0 -> 1 -> 0 cycle
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Draw studio floor & subtle grid
+      // Studio Floor
       ctx.fillStyle = '#0f172a';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.strokeStyle = '#334155';
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(20, 118);
-      ctx.lineTo(280, 118);
+      ctx.moveTo(15, 118);
+      ctx.lineTo(285, 118);
       ctx.stroke();
 
       const skin = '#f4a261';
-      const shirt = '#10b981'; // Emerald athletic top
-      const pants = '#38bdf8'; // Sky blue athletic leggings/shorts
+      const shirt = '#10b981';
+      const pants = '#38bdf8';
       const shoe = '#f8fafc';
 
-      if (animType === 'pushup' || animType === 'diamond_pushup') {
-        // FLAT PLANK PUSH-UP: Chest lowers from high plank to grazing the floor
-        const drop = rep * 26;
-        const shoulderX = 95, shoulderY = 62 + drop;
-        const hipX = 165, hipY = 76 + drop * 0.75;
-        const footX = 235, footY = 112;
-        const handX = animType === 'diamond_pushup' ? 108 : 92;
-        const handY = 114;
-        const elbowX = animType === 'diamond_pushup' ? 118 : 112 + rep * 10;
-        const elbowY = 88 + drop * 0.5;
+      if (animType === 'tempo_pushup') {
+        // TEMPO 3-1-1 PUSH-UP: Asymmetric slow 3s lowering, 1s bottom pause, fast push + Live Phase HUD
+        const cycleSec = (t * 1.4) % 5; // 5-second total rep loop (3s down, 1s hold, 1s up)
+        let depth = 0;
+        let phaseLabel = '3s SLOW LOWERING ⬇️';
+        if (cycleSec < 3) {
+          depth = cycleSec / 3;
+          phaseLabel = `LOWERING: ${Math.ceil(3 - cycleSec)}s ⬇️`;
+        } else if (cycleSec < 4) {
+          depth = 1;
+          phaseLabel = 'HOLD AT BOTTOM: 1s ⏸️';
+        } else {
+          depth = 1 - (cycleSec - 4);
+          phaseLabel = 'EXPLOSIVE PUSH! ⬆️';
+        }
 
-        // Legs & Shoes
+        const drop = depth * 26;
+        const shoulderX = 92, shoulderY = 60 + drop;
+        const hipX = 165, hipY = 75 + drop * 0.75;
+        const footX = 235, footY = 112;
+
         drawLimb(hipX, hipY, footX, footY, 11, pants);
         drawLimb(footX, footY, footX + 6, footY + 3, 7, shoe);
-        // Torso
         drawLimb(shoulderX, shoulderY, hipX, hipY, 15, shirt);
-        // Upper Arm & Forearm
-        drawLimb(shoulderX, shoulderY, elbowX, elbowY, 9, skin);
-        drawLimb(elbowX, elbowY, handX, handY, 8, skin);
-        // Head
+        drawLimb(shoulderX, shoulderY, 108 + depth * 8, 86 + drop * 0.4, 9, skin);
+        drawLimb(108 + depth * 8, 86 + drop * 0.4, 92, 114, 8, skin);
         drawHead(shoulderX - 16, shoulderY - 4, 9);
 
-      } else if (animType === 'incline_pushup') {
-        // INCLINE PUSH-UP: Hands elevated on a box/bench on the left
-        ctx.fillStyle = '#475569';
-        ctx.fillRect(45, 82, 42, 36); // Bench box
-        const drop = rep * 20;
-        const shoulderX = 90 - rep * 8, shoulderY = 46 + drop;
-        const hipX = 155, hipY = 74 + drop * 0.5;
-        const footX = 220, footY = 112;
-        const handX = 72, handY = 82;
-        const elbowX = 92, elbowY = 68 + drop * 0.4;
+        // Tempo HUD Badge
+        ctx.fillStyle = '#34d399';
+        ctx.font = 'bold 10px monospace';
+        ctx.fillText(phaseLabel, 20, 22);
 
-        drawLimb(hipX, hipY, footX, footY, 11, pants);
-        drawLimb(shoulderX, shoulderY, hipX, hipY, 15, shirt);
-        drawLimb(shoulderX, shoulderY, elbowX, elbowY, 9, skin);
-        drawLimb(elbowX, elbowY, handX, handY, 8, skin);
-        drawHead(shoulderX - 13, shoulderY - 8, 9);
+      } else if (animType === 'diamond_pushup') {
+        // DIAMOND PUSH-UP (FRONT/3D VIEW): Shows hands touching in a ♦ Diamond under sternum & elbows tucked to ribs!
+        const drop = rep * 28;
+        const centerX = 150;
+        const handY = 114;
+        const shoulderY = 48 + drop;
+        const elbowSpread = 22 + rep * 10; // Elbows stay tucked narrow!
+        const elbowY = 82 + drop * 0.45;
+
+        // Legs extending back in perspective
+        drawLimb(centerX - 10, shoulderY - 6, centerX - 18, 28, 10, pants);
+        drawLimb(centerX + 10, shoulderY - 6, centerX + 18, 28, 10, pants);
+        // Wide Shoulders / Upper Chest
+        drawLimb(centerX - 26, shoulderY, centerX + 26, shoulderY, 18, shirt);
+        // Left & Right Triceps/Arms converging to a single Diamond point at centerX!
+        drawLimb(centerX - 24, shoulderY, centerX - elbowSpread, elbowY, 9, '#f59e0b'); // Highlighted triceps
+        drawLimb(centerX - elbowSpread, elbowY, centerX - 4, handY, 8, skin);
+        drawLimb(centerX + 24, shoulderY, centerX + elbowSpread, elbowY, 9, '#f59e0b');
+        drawLimb(centerX + elbowSpread, elbowY, centerX + 4, handY, 8, skin);
+        drawHead(centerX, shoulderY + 4, 10);
+
+        // Glowing ♦ Diamond Hand Position Indicator
+        ctx.fillStyle = '#fbbf24';
+        ctx.font = 'bold 11px monospace';
+        ctx.fillText('♦ DIAMOND GRIP (TRICEPS)', 18, 22);
+
+      } else if (animType === 'archer_pushup') {
+        // ARCHER PUSH-UP (FRONT VIEW): Wide hands, shifting torso side-to-side while opposite arm stays locked straight
+        const shift = Math.sin(t) * 32;
+        const drop = Math.abs(Math.sin(t)) * 22;
+        const centerX = 150 + shift;
+        const shoulderY = 54 + drop;
+
+        drawLimb(centerX - 20, shoulderY, centerX + 20, shoulderY, 16, shirt);
+        // Left Arm (wide hand at x=85) & Right Arm (wide hand at x=215)
+        drawLimb(centerX - 18, shoulderY, 85, 114, 8, skin);
+        drawLimb(centerX + 18, shoulderY, 215, 114, 8, skin);
+        drawHead(centerX, shoulderY - 8, 9);
+        ctx.fillStyle = '#38bdf8';
+        ctx.font = 'bold 10px monospace';
+        ctx.fillText('⇄ WIDE SIDE-TO-SIDE ARCHER', 18, 22);
 
       } else if (animType === 'pike_pushup') {
-        // PIKE PUSH-UP: Steep inverted V-shape, hips stay high while head lowers between hands!
+        // PIKE PUSH-UP: Steep inverted V-shape on floor, hips high, crown of head lowers between hands
         const dip = rep * 24;
         const handX = 95, handY = 114;
         const footX = 215, footY = 114;
-        const hipX = 162 - rep * 6, hipY = 38 + dip * 0.25; // Hips stay HIGH in V-shape!
+        const hipX = 162 - rep * 6, hipY = 36 + dip * 0.2;
         const shoulderX = 115 - rep * 12, shoulderY = 66 + dip;
         const elbowX = 90 - rep * 6, elbowY = 92 + dip * 0.3;
 
-        // Straight piked legs from floor to high hips
         drawLimb(footX, footY, hipX, hipY, 11, pants);
-        // Steep angled torso pointing down toward floor
         drawLimb(hipX, hipY, shoulderX, shoulderY, 15, shirt);
-        // Arms bending to lower crown of head toward floor
         drawLimb(shoulderX, shoulderY, elbowX, elbowY, 9, skin);
         drawLimb(elbowX, elbowY, handX, handY, 8, skin);
         drawHead(shoulderX - 10, shoulderY + 11, 9);
+        ctx.fillStyle = '#34d399';
+        ctx.font = 'bold 10px monospace';
+        ctx.fillText('▲ INVERTED V-PIKE (SHOULDERS)', 18, 22);
 
-      } else if (animType === 'pullup') {
-        // STRICT PULL-UP: Overhead bar, body pulls vertically until chin clears bar
-        ctx.strokeStyle = '#94a3b8';
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        ctx.moveTo(90, 18); ctx.lineTo(210, 18);
-        ctx.stroke();
-
-        const lift = rep * 32;
-        const handY = 18;
-        const shoulderY = 52 - lift;
-        const hipY = 86 - lift;
-        const footY = 115 - lift * 0.85;
-        const elbowX = 126 - rep * 8, elbowY = 36 - lift * 0.4;
-
-        // Legs hanging straight
-        drawLimb(150, hipY, 150, footY, 12, pants);
-        // Torso
-        drawLimb(150, shoulderY, 150, hipY, 16, shirt);
-        // Left & Right Arms pulling to bar
-        drawLimb(142, shoulderY, elbowX, elbowY, 8, skin);
-        drawLimb(elbowX, elbowY, 130, handY, 7, skin);
-        drawLimb(158, shoulderY, 300 - elbowX, elbowY, 8, skin);
-        drawLimb(300 - elbowX, elbowY, 170, handY, 7, skin);
-        drawHead(150, shoulderY - 14, 9);
-
-      } else if (animType === 'row') {
-        // AUSTRALIAN / INVERTED ROW: Hanging under low bar, pulling chest up to bar
-        ctx.strokeStyle = '#94a3b8';
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        ctx.moveTo(115, 30); ctx.lineTo(115, 118); // Vertical rack post
-        ctx.stroke();
-
-        const pull = rep * 20;
-        const handX = 115, handY = 54;
-        const footX = 215, footY = 114;
-        const shoulderX = 105 + pull * 0.4, shoulderY = 86 - pull;
-        const hipX = 160 + pull * 0.2, hipY = 100 - pull * 0.5;
-        const elbowX = 95 + pull * 0.2, elbowY = 74 - pull * 0.5;
+      } else if (animType === 'floor_pulldown' || animType === 'prone_cobra') {
+        // NO-EQUIPMENT FLOOR PULL: Lying face down on floor, lifting chest & driving elbows back to contract lats
+        const pull = rep * 28;
+        const hipX = 175, hipY = 110;
+        const footX = 240, footY = 113;
+        const shoulderX = 112 + pull * 0.35, shoulderY = 104 - rep * 18; // Chest lifts off floor!
+        const handX = 65 + pull * 1.4, handY = 106 - (animType === 'prone_cobra' ? 14 : 0);
+        const elbowX = 90 + pull * 1.2, elbowY = 98 - rep * 10;
 
         drawLimb(hipX, hipY, footX, footY, 11, pants);
-        drawLimb(shoulderX, shoulderY, hipX, hipY, 15, shirt);
+        drawLimb(shoulderX, shoulderY, hipX, hipY, 14, shirt);
         drawLimb(shoulderX, shoulderY, elbowX, elbowY, 8, skin);
-        drawLimb(elbowX, elbowY, handX, handY, 8, skin);
-        drawHead(shoulderX - 12, shoulderY - 8, 9);
+        drawLimb(elbowX, elbowY, handX, handY, 7, skin);
+        drawHead(shoulderX - 14, shoulderY - 6, 8);
+        ctx.fillStyle = '#38bdf8';
+        ctx.font = 'bold 10px monospace';
+        ctx.fillText('FLOOR LAT PULL & BACK EXTENSION (NO BAR)', 18, 22);
 
-      } else if (animType === 'hanging_leg_raise') {
-        // HANGING LEG RAISE: Hanging from overhead bar, curling straight legs from vertical to 90° horizontal!
-        ctx.strokeStyle = '#94a3b8';
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        ctx.moveTo(90, 14); ctx.lineTo(210, 14);
-        ctx.stroke();
-
-        const handX = 140, handY = 14;
-        const shoulderX = 140, shoulderY = 42;
-        const hipX = 140, hipY = 74;
-        // Angle swings from straight down (PI/2) to horizontal (0)
-        const angle = (1 - rep) * (Math.PI / 2);
-        const legLen = 38;
+      } else if (animType === 'floor_leg_raise') {
+        // LYING FLOOR LEG RAISE (ZERO EQUIPMENT): Lying flat on back on floor, raising straight legs from 0° to 90°!
+        const hipX = 125, hipY = 109;
+        const shoulderX = 72, shoulderY = 109;
+        // Angle goes from horizontal just above floor (0.08 rad) up to vertical 90° (PI/2)
+        const angle = 0.08 + rep * (Math.PI / 2 - 0.08);
+        const legLen = 62;
         const footX = hipX + Math.cos(angle) * legLen;
-        const footY = hipY + Math.sin(angle) * legLen;
+        const footY = hipY - Math.sin(angle) * legLen;
 
-        // Arms straight up to bar
-        drawLimb(shoulderX, shoulderY, handX, handY, 8, skin);
-        // Torso
-        drawLimb(shoulderX, shoulderY, hipX, hipY, 15, shirt);
-        drawHead(shoulderX, shoulderY - 12, 8);
-        // Legs raising up to 90 degrees!
-        drawLimb(hipX, hipY, footX, footY, 11, pants);
-        drawLimb(footX, footY, footX + 5, footY - 3, 7, shoe);
+        // Torso & Arms flat on the floor
+        drawLimb(shoulderX, shoulderY, hipX, hipY, 14, shirt);
+        drawLimb(shoulderX + 10, shoulderY + 2, hipX + 5, 114, 7, skin);
+        drawHead(shoulderX - 14, shoulderY - 3, 8);
+        // Straight legs lifting to 90 degrees!
+        drawLimb(hipX, hipY - rep * 5, footX, footY, 11, pants);
+        drawLimb(footX, footY, footX + 6, footY - 3, 7, shoe);
+        ctx.fillStyle = '#a855f7';
+        ctx.font = 'bold 10px monospace';
+        ctx.fillText('⬆️ LYING FLOOR LEG RAISE (NO BAR)', 18, 22);
 
-      } else if (animType === 'hollow_hold') {
-        // HOLLOW BODY HOLD: Curved banana shape on the floor, shoulders and straight legs lifted
-        const rock = Math.sin(t * 1.5) * 4;
-        const hipX = 150, hipY = 110;
-        const shoulderX = 102, shoulderY = 92 + rock;
-        const headX = 88, headY = 82 + rock;
-        const footX = 215, footY = 86 - rock;
+      } else if (animType === 'floor_v_up' || animType === 'hollow_hold') {
+        // FLOOR V-UP / HOLLOW HOLD: Torso and straight legs fold upward into a V on the floor
+        const fold = animType === 'hollow_hold' ? 0.25 + rep * 0.1 : rep * 0.85;
+        const hipX = 148, hipY = 110;
+        const shoulderX = hipX - Math.cos(fold) * 48;
+        const shoulderY = hipY - Math.sin(fold) * 48;
+        const footX = hipX + Math.cos(fold) * 58;
+        const footY = hipY - Math.sin(fold) * 58;
 
         drawLimb(shoulderX, shoulderY, hipX, hipY, 14, shirt);
         drawLimb(hipX, hipY, footX, footY, 11, pants);
-        drawLimb(shoulderX, shoulderY, 72, 74 + rock, 7, skin); // Arms extended overhead
-        drawHead(headX, headY, 8);
+        drawLimb(shoulderX, shoulderY, footX - 15, footY + 5, 7, skin); // Hands reaching toward toes
+        drawHead(shoulderX - 10, shoulderY - 8, 8);
+        ctx.fillStyle = '#a855f7';
+        ctx.font = 'bold 10px monospace';
+        ctx.fillText(animType === 'hollow_hold' ? 'FLOOR HOLLOW BODY HOLD' : 'FLOOR V-UP COMPRESSION', 18, 22);
 
-      } else if (animType === 'split_squat' || animType === 'squat') {
-        // BULGARIAN SPLIT SQUAT / PISTOL SQUAT: Rear foot on bench, deep single-leg knee bend
-        ctx.fillStyle = '#475569';
-        ctx.fillRect(205, 86, 38, 32); // Rear bench
-        const depth = rep * 24;
-        const hipX = 145, hipY = 60 + depth;
-        const shoulderX = 142, shoulderY = 28 + depth;
-        const frontKneeX = 118 - rep * 6, frontKneeY = 86 + depth * 0.3;
-        const frontFootX = 120, frontFootY = 114;
-        const rearKneeX = 175, rearKneeY = 82 + depth * 0.85;
-        const rearFootX = 212, rearFootY = 86;
+      } else if (animType === 'floor_lunge' || animType === 'pistol_squat') {
+        // FLOOR SPLIT SQUAT / PISTOL SQUAT (NO BENCH): Both feet on floor level
+        const depth = rep * 26;
+        const hipX = 145, hipY = 58 + depth;
+        const shoulderX = 143, shoulderY = 26 + depth;
+        const frontKneeX = 115, frontKneeY = 84 + depth * 0.3;
+        const frontFootX = 115, frontFootY = 114;
 
-        // Rear elevated leg
-        drawLimb(hipX, hipY, rearKneeX, rearKneeY, 9, '#0284c7');
-        drawLimb(rearKneeX, rearKneeY, rearFootX, rearFootY, 8, '#0284c7');
-        // Front working leg
+        if (animType === 'pistol_squat') {
+          // Non-working leg extended straight out in front!
+          drawLimb(hipX, hipY, 82, hipY - 4, 10, '#0284c7');
+        } else {
+          // Back knee lowering to kiss the floor (no bench!)
+          drawLimb(hipX, hipY, 175, 86 + depth * 0.9, 10, '#0284c7');
+          drawLimb(175, 86 + depth * 0.9, 208, 114, 9, '#0284c7');
+        }
+
         drawLimb(hipX, hipY, frontKneeX, frontKneeY, 11, pants);
         drawLimb(frontKneeX, frontKneeY, frontFootX, frontFootY, 10, pants);
-        // Torso & Arms
         drawLimb(shoulderX, shoulderY, hipX, hipY, 15, shirt);
-        drawLimb(shoulderX, shoulderY, 122, shoulderY + 18, 8, skin);
+        drawLimb(shoulderX, shoulderY, 112, shoulderY + 10, 8, skin);
         drawHead(shoulderX, shoulderY - 13, 9);
+        ctx.fillStyle = '#fbbf24';
+        ctx.font = 'bold 10px monospace';
+        ctx.fillText(animType === 'pistol_squat' ? 'SINGLE-LEG PISTOL SQUAT' : 'FLOOR SPLIT SQUAT (NO BENCH)', 18, 22);
+
+      } else if (animType === 'glute_bridge') {
+        // SINGLE-LEG FLOOR GLUTE BRIDGE
+        const lift = rep * 24;
+        const shoulderX = 85, shoulderY = 110;
+        const hipX = 140, hipY = 108 - lift;
+        const kneeX = 182, kneeY = 76 - lift * 0.3;
+        const footX = 195, footY = 114;
+
+        drawLimb(shoulderX, shoulderY, hipX, hipY, 14, shirt);
+        drawLimb(hipX, hipY, kneeX, kneeY, 11, pants);
+        drawLimb(kneeX, kneeY, footX, footY, 10, pants);
+        drawLimb(hipX, hipY, 175, 48 - lift, 9, '#0284c7'); // Raised single leg
+        drawHead(shoulderX - 14, shoulderY - 2, 8);
+        ctx.fillStyle = '#fbbf24';
+        ctx.font = 'bold 10px monospace';
+        ctx.fillText('SINGLE-LEG FLOOR BRIDGE', 18, 22);
 
       } else {
-        // RUNNING STRIDE ANIMATION
+        // RUNNING STRIDE
         const stride = Math.sin(t * 2) * 24;
         const bounce = Math.abs(Math.cos(t * 2)) * 6;
         const shoulderX = 152, shoulderY = 38 - bounce;
         const hipX = 145, hipY = 70 - bounce;
 
-        // Back Leg & Front Leg alternating
         drawLimb(hipX, hipY, 145 - stride, 112, 10, '#0284c7');
         drawLimb(hipX, hipY, 145 + stride, 112, 11, pants);
-        // Torso
         drawLimb(shoulderX, shoulderY, hipX, hipY, 15, shirt);
-        // Pumping Runner Arms
         drawLimb(shoulderX, shoulderY, 150 - stride * 0.7, 62 - bounce, 8, skin);
         drawHead(shoulderX + 3, shoulderY - 13, 9);
+        ctx.fillStyle = '#38bdf8';
+        ctx.font = 'bold 10px monospace';
+        ctx.fillText('🏃‍♂️ PROGRESSIVE ZONE 2 RUN', 18, 22);
       }
 
       animId = requestAnimationFrame(render);
@@ -266,7 +288,7 @@ function ExerciseVisualCoach({ animType, name, steps }) {
           onClick={() => setShowSteps(!showSteps)}
           className="absolute bottom-2 right-2 text-[10px] font-bold bg-slate-900/90 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-lg"
         >
-          {showSteps ? 'Hide Form Guide ▲' : 'How to Perform ▼'}
+          {showSteps ? 'Hide Form Steps ▲' : 'How to Perform ▼'}
         </button>
       </div>
       {showSteps && steps && (
@@ -287,55 +309,52 @@ function App() {
 
   const fileInputRef = useRef(null);
 
-  // --- PERSISTENT STATES ---
   const [profile, setProfile] = useState(() => {
-    const s = localStorage.getItem('cali_profile_v9');
+    const s = localStorage.getItem('cali_profile_v10');
     return s ? JSON.parse(s) : {
       age: 32, weightKg: 78, heightCm: 178, gender: 'male',
       level: 'intermediate', durationMonths: 2, daysPerWeek: 4,
-      equipment: 'pullup_bar', primaryGoal: 'recomp'
+      equipment: 'none', primaryGoal: 'recomp'
     };
   });
 
   const [workoutLogs, setWorkoutLogs] = useState(() => {
-    const s = localStorage.getItem('cali_logs_v9');
+    const s = localStorage.getItem('cali_logs_v10');
     return s ? JSON.parse(s) : {};
   });
 
   const [biometrics, setBiometrics] = useState(() => {
-    const s = localStorage.getItem('cali_bio_v9');
+    const s = localStorage.getItem('cali_bio_v10');
     return s ? JSON.parse(s) : [
-      { week: 1, date: new Date().toISOString().slice(0, 10), weightKg: 78, waistCm: 86, maxPullups: 6, maxPushups: 20 }
+      { week: 1, date: new Date().toISOString().slice(0, 10), weightKg: 78, waistCm: 86, maxPullups: 12, maxPushups: 20 }
     ];
   });
 
   const [foodLogs, setFoodLogs] = useState(() => {
-    const s = localStorage.getItem('cali_food_v9');
+    const s = localStorage.getItem('cali_food_v10');
     return s ? JSON.parse(s) : [];
   });
 
   const [runLogs, setRunLogs] = useState(() => {
-    const s = localStorage.getItem('cali_run_v9');
+    const s = localStorage.getItem('cali_run_v10');
     return s ? JSON.parse(s) : [];
   });
 
-  // Watch State: Defaults to accurate resting HR (72 BPM) and lets BLE or user update it
   const [watchData, setWatchData] = useState(() => {
-    const s = localStorage.getItem('cali_watch_v9');
+    const s = localStorage.getItem('cali_watch_v10');
     return s ? JSON.parse(s) : { connected: false, device: 'Samsung Health / Watch', heartRate: 72, caloriesBurned: 0, steps: 5000 };
   });
 
   const [searchResults, setSearchResults] = useState([]);
   const [customFoodGrams, setCustomFoodGrams] = useState(100);
 
-  useEffect(() => { localStorage.setItem('cali_profile_v9', JSON.stringify(profile)); }, [profile]);
-  useEffect(() => { localStorage.setItem('cali_logs_v9', JSON.stringify(workoutLogs)); }, [workoutLogs]);
-  useEffect(() => { localStorage.setItem('cali_bio_v9', JSON.stringify(biometrics)); }, [biometrics]);
-  useEffect(() => { localStorage.setItem('cali_food_v9', JSON.stringify(foodLogs)); }, [foodLogs]);
-  useEffect(() => { localStorage.setItem('cali_run_v9', JSON.stringify(runLogs)); }, [runLogs]);
-  useEffect(() => { localStorage.setItem('cali_watch_v9', JSON.stringify(watchData)); }, [watchData]);
+  useEffect(() => { localStorage.setItem('cali_profile_v10', JSON.stringify(profile)); }, [profile]);
+  useEffect(() => { localStorage.setItem('cali_logs_v10', JSON.stringify(workoutLogs)); }, [workoutLogs]);
+  useEffect(() => { localStorage.setItem('cali_bio_v10', JSON.stringify(biometrics)); }, [biometrics]);
+  useEffect(() => { localStorage.setItem('cali_food_v10', JSON.stringify(foodLogs)); }, [foodLogs]);
+  useEffect(() => { localStorage.setItem('cali_run_v10', JSON.stringify(runLogs)); }, [runLogs]);
+  useEffect(() => { localStorage.setItem('cali_watch_v10', JSON.stringify(watchData)); }, [watchData]);
 
-  // --- REST TIMER ---
   const [timerSec, setTimerSec] = useState(60);
   const [timerActive, setTimerActive] = useState(false);
 
@@ -350,13 +369,12 @@ function App() {
     return () => clearInterval(interval);
   }, [timerActive, timerSec]);
 
-  // --- ENGINE COMPUTATIONS ---
   const metrics = useMemo(
     () => calculateMetrics(profile, foodLogs, runLogs, workoutLogs, activeWeek, watchData),
     [profile, foodLogs, runLogs, workoutLogs, activeWeek, watchData]
   );
   const plateauAdvice = useMemo(() => evaluatePlateau(biometrics), [biometrics]);
-  const pool = useMemo(() => getExercisePool(profile.level, profile.equipment), [profile.level, profile.equipment]);
+  const pool = useMemo(() => getExercisePool(profile.level), [profile.level]);
 
   const totalWeeks = profile.durationMonths * 4;
   const isShredPhase = activeWeek > totalWeeks / 2;
@@ -365,41 +383,40 @@ function App() {
   const targetMax = isShredPhase ? 16 : 12;
   const restSec = isShredPhase ? 45 : 70;
 
-  // Base Run Duration scales safely from 10 mins in Week 1 + Food Surplus / Plateau adjustments
   const baseRunMins = activeWeek === 1 ? 10 : activeWeek === 2 ? 12 : activeWeek <= 4 ? 15 : activeWeek <= 6 ? 18 : 22;
   const todayTargetRunMins = baseRunMins + metrics.extraRunMinutesNeeded + (plateauAdvice.extraRunMins || 0);
 
   const days = useMemo(() => [
     {
-      dayNumber: 1, title: 'Run + Push & Core',
+      dayNumber: 1, title: 'Run + Floor Push & Core',
       exercises: [
         { ...pool.run, id: 'run_d1', name: `1st Exercise: Zone 2 Run (${todayTargetRunMins} mins)`, sets: 1, min: todayTargetRunMins, max: todayTargetRunMins + 5, unit: 'mins' },
         { ...pool.push[0], sets: setsCount, min: targetMin, max: targetMax, unit: 'reps' },
         { ...pool.push[1], sets: setsCount, min: targetMin, max: targetMax, unit: 'reps' },
         { ...pool.push[2], sets: setsCount - 1, min: targetMin, max: targetMax, unit: 'reps' },
-        { ...pool.core[0], sets: 3, min: 30, max: 45, unit: 'sec' }
+        { ...pool.core[0], sets: 3, min: 12, max: 16, unit: 'reps' }
       ]
     },
     {
-      dayNumber: 2, title: 'Run + Pull & Core',
+      dayNumber: 2, title: 'Run + Floor Back & Core',
       exercises: [
         { ...pool.run, id: 'run_d2', name: `1st Exercise: Fat-Burn Jog (${todayTargetRunMins} mins)`, sets: 1, min: todayTargetRunMins, max: todayTargetRunMins + 5, unit: 'mins' },
         { ...pool.pull[0], sets: setsCount, min: targetMin, max: targetMax, unit: 'reps' },
         { ...pool.pull[1], sets: setsCount, min: targetMin, max: targetMax, unit: 'reps' },
-        { ...pool.core[0], sets: 3, min: 30, max: 45, unit: 'sec' }
+        { ...pool.core[0], sets: 3, min: 12, max: 16, unit: 'reps' }
       ]
     },
     {
-      dayNumber: 3, title: 'Run + Legs & Core',
+      dayNumber: 3, title: 'Run + Floor Legs & Core',
       exercises: [
         { ...pool.run, id: 'run_d3', name: `1st Exercise: Interval Run (${todayTargetRunMins} mins)`, sets: 1, min: todayTargetRunMins, max: todayTargetRunMins + 5, unit: 'mins' },
         { ...pool.legs[0], sets: setsCount, min: targetMin, max: targetMax, unit: 'reps' },
         { ...pool.legs[1], sets: setsCount, min: targetMin, max: targetMax, unit: 'reps' },
-        { ...pool.core[0], sets: 3, min: 30, max: 45, unit: 'sec' }
+        { ...pool.core[0], sets: 3, min: 12, max: 16, unit: 'reps' }
       ]
     },
     {
-      dayNumber: 4, title: 'Run + Full-Body Supersets',
+      dayNumber: 4, title: 'Run + Full-Body Floor Supersets',
       exercises: [
         { ...pool.run, id: 'run_d4', name: `1st Exercise: Tempo Run (${todayTargetRunMins} mins)`, sets: 1, min: todayTargetRunMins, max: todayTargetRunMins + 5, unit: 'mins' },
         { ...pool.push[0], id: 'ss_push', name: `A1: ${pool.push[0].name}`, sets: setsCount, min: targetMin, max: targetMax, unit: 'reps' },
@@ -413,11 +430,10 @@ function App() {
   const logSet = (exId, sIdx, val) => setWorkoutLogs((p) => ({ ...p, [`w${activeWeek}-d${activeDay.dayNumber}-${exId}-s${sIdx}`]: Math.max(0, val) }));
   const getSet = (w, d, exId, sIdx) => workoutLogs[`w${w}-d${d}-${exId}-s${sIdx}`] ?? 0;
 
-  const [newBio, setNewBio] = useState({ weightKg: profile.weightKg, waistCm: 84, maxPullups: 8, maxPushups: 25 });
+  const [newBio, setNewBio] = useState({ weightKg: profile.weightKg, waistCm: 84, maxPullups: 15, maxPushups: 25 });
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 pb-24 select-none">
-      {/* STICKY HEADER */}
       <header className="sticky top-0 z-30 bg-slate-900/95 backdrop-blur border-b border-slate-800 px-4 py-3 flex items-center justify-between">
         <div>
           <h1 className="text-sm font-extrabold text-white flex items-center gap-1.5">
@@ -426,7 +442,7 @@ function App() {
             <span className="text-[10px] px-1.5 py-0.5 rounded bg-rose-500/15 text-rose-400">❤️ {watchData.heartRate} BPM</span>
           </h1>
           <p className="text-[11px] text-slate-400">
-            Eaten: {metrics.todayFoodCalories} / {metrics.baseTargetCalories} kcal • Run Burn: +{metrics.totalRunCalories} kcal
+            Eaten: {metrics.todayFoodCalories} / {metrics.baseTargetCalories} kcal • Burn: +{metrics.totalRunCalories} kcal
           </p>
         </div>
         <div className="flex items-center gap-1.5 bg-slate-950 border border-slate-800 px-2.5 py-1.5 rounded-xl">
@@ -441,13 +457,10 @@ function App() {
       </header>
 
       <main className="max-w-lg mx-auto px-4 pt-4 space-y-4">
-        
-        {/* DYNAMIC CALORIE-TO-EXERCISE BANNER */}
         <div className="bg-slate-900/90 border border-emerald-500/30 rounded-2xl p-3 text-xs text-slate-300 flex items-center justify-between">
           <span>💡 {metrics.adjustmentMessage}</span>
         </div>
 
-        {/* TAB 1: WORKOUT LOGGER */}
         {activeTab === 'workout' && (
           <>
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
@@ -467,66 +480,61 @@ function App() {
             </div>
 
             <div className="space-y-4">
-              {activeDay.exercises.map((ex) => {
-                return (
-                  <div key={ex.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
-                    <div className="flex justify-between items-start gap-2">
-                      <div>
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded-md mb-1 inline-block">
-                          {ex.category === 'Run' ? '🏃‍♂️ Step 1: Progressive Running Block' : `🏋️ Calisthenics (${ex.category})`}
-                        </span>
-                        <h3 className="text-sm font-bold text-white">{ex.name}</h3>
-                        <p className="text-[11px] text-slate-400">{ex.cue}</p>
-                      </div>
-                      <button
-                        onClick={() => { setTimerSec(ex.category === 'Run' ? ex.min * 60 : restSec); setTimerActive(true); }}
-                        className="shrink-0 text-[11px] bg-slate-950 border border-slate-800 px-2.5 py-1.5 rounded-lg text-emerald-400 font-bold"
-                      >
-                        {ex.category === 'Run' ? `⏱️ Start ${ex.min}m Run` : `Target: ${ex.min}–${ex.max} ${ex.unit}`}
-                      </button>
+              {activeDay.exercises.map((ex) => (
+                <div key={ex.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+                  <div className="flex justify-between items-start gap-2">
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded-md mb-1 inline-block">
+                        {ex.category === 'Run' ? '🏃‍♂️ Step 1: Progressive Running Block' : `🏋️ Zero-Equipment (${ex.category})`}
+                      </span>
+                      <h3 className="text-sm font-bold text-white">{ex.name}</h3>
+                      <p className="text-[11px] text-slate-400">{ex.cue}</p>
                     </div>
+                    <button
+                      onClick={() => { setTimerSec(ex.category === 'Run' ? ex.min * 60 : restSec); setTimerActive(true); }}
+                      className="shrink-0 text-[11px] bg-slate-950 border border-slate-800 px-2.5 py-1.5 rounded-lg text-emerald-400 font-bold"
+                    >
+                      {ex.category === 'Run' ? `⏱️ Start ${ex.min}m Run` : `Target: ${ex.min}–${ex.max} ${ex.unit}`}
+                    </button>
+                  </div>
 
-                    {/* UNIQUE ANIMATED HUMAN CHARACTER + STEP-BY-STEP FORM GUIDE */}
-                    <ExerciseVisualCoach animType={ex.animType || 'pushup'} name={ex.name} steps={ex.steps} />
+                  <ExerciseVisualCoach animType={ex.animType || 'tempo_pushup'} name={ex.name} steps={ex.steps} />
 
-                    {/* CLEARLY EXPLAINED SET INPUT BOXES */}
-                    <div className="pt-2 border-t border-slate-800 space-y-1.5">
-                      <p className="text-[10px] text-slate-400">
-                        {ex.category === 'Run'
-                          ? `👇 Enter how many minutes you ran below (Target: ${ex.min} mins). Calories burned update automatically:`
-                          : `👇 Enter the exact ${ex.unit} you completed in each set (turns green when you hit ${ex.min}+ ${ex.unit}):`}
-                      </p>
-                      <div className="grid grid-cols-4 gap-2">
-                        {Array.from({ length: ex.sets }).map((_, sIdx) => {
-                          const val = getSet(activeWeek, activeDay.dayNumber, ex.id, sIdx);
-                          return (
-                            <div key={sIdx} className="flex flex-col">
-                              <span className="text-[10px] text-slate-300 font-semibold mb-1 text-center">
-                                {ex.category === 'Run' ? 'Minutes Ran' : `Set ${sIdx + 1} (${ex.unit})`}
-                              </span>
-                              <input
-                                type="number"
-                                inputMode="numeric"
-                                placeholder="0"
-                                value={val || ''}
-                                onChange={(e) => logSet(ex.id, sIdx, Number(e.target.value))}
-                                className={`w-full text-center py-2 rounded-xl text-sm font-bold border outline-none ${
-                                  val >= ex.min ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300' : 'bg-slate-950 border-slate-800 text-white'
-                                }`}
-                              />
-                            </div>
-                          );
-                        })}
-                      </div>
+                  <div className="pt-2 border-t border-slate-800 space-y-1.5">
+                    <p className="text-[10px] text-slate-400">
+                      {ex.category === 'Run'
+                        ? `👇 Enter how many minutes you ran below (Target: ${ex.min} mins):`
+                        : `👇 Enter the exact ${ex.unit} completed in each set (turns green at ${ex.min}+ ${ex.unit}):`}
+                    </p>
+                    <div className="grid grid-cols-4 gap-2">
+                      {Array.from({ length: ex.sets }).map((_, sIdx) => {
+                        const val = getSet(activeWeek, activeDay.dayNumber, ex.id, sIdx);
+                        return (
+                          <div key={sIdx} className="flex flex-col">
+                            <span className="text-[10px] text-slate-300 font-semibold mb-1 text-center">
+                              {ex.category === 'Run' ? 'Minutes Ran' : `Set ${sIdx + 1} (${ex.unit})`}
+                            </span>
+                            <input
+                              type="number"
+                              inputMode="numeric"
+                              placeholder="0"
+                              value={val || ''}
+                              onChange={(e) => logSet(ex.id, sIdx, Number(e.target.value))}
+                              className={`w-full text-center py-2 rounded-xl text-sm font-bold border outline-none ${
+                                val >= ex.min ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300' : 'bg-slate-950 border-slate-800 text-white'
+                              }`}
+                            />
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
-                );
-              })}
+                </div>
+              ))}
             </div>
           </>
         )}
 
-        {/* TAB 2: NUTRITION & FOOD SEARCH */}
         {activeTab === 'nutrition' && (
           <div className="space-y-4">
             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
@@ -534,9 +542,6 @@ function App() {
                 <span>🍏 Daily Calorie & Macro Summary</span>
                 <span className="text-white font-mono">{metrics.todayFoodCalories} / {metrics.baseTargetCalories} kcal</span>
               </h2>
-              <p className="text-[11px] text-slate-400">
-                To lose fat while building muscle, stay near <strong>{metrics.baseTargetCalories} kcal/day</strong> and hit <strong>{metrics.proteinGrams}g protein</strong>. If you eat over target, the app automatically adds minutes to your Run block.
-              </p>
               <div className="grid grid-cols-3 gap-2 text-center text-xs">
                 <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800"><span className="text-[10px] text-slate-400 block">Maintenance TDEE</span><strong className="text-white">{metrics.tdee} kcal</strong></div>
                 <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800"><span className="text-[10px] text-slate-400 block">Exercise Burn</span><strong className="text-sky-400">+{metrics.totalRunCalories} kcal</strong></div>
@@ -544,17 +549,13 @@ function App() {
               </div>
             </div>
 
-            {/* OpenFoodFacts Live Search */}
             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
               <h3 className="text-xs font-bold uppercase text-emerald-400">1. Search Supermarket Food (OpenFoodFacts)</h3>
-              <p className="text-[11px] text-slate-400">Set your portion size in grams first, then search and tap any food to log its exact calories:</p>
-              
               <div className="flex items-center gap-2 bg-slate-950 p-2.5 rounded-xl border border-slate-800">
                 <label className="text-xs text-slate-300 font-semibold">Portion Weight (Grams):</label>
                 <input type="number" value={customFoodGrams} onChange={(e) => setCustomFoodGrams(Number(e.target.value))} className="w-24 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-xs font-bold text-center text-emerald-400" />
                 <span className="text-[10px] text-slate-500">g</span>
               </div>
-
               <input
                 type="text"
                 placeholder="Type food name (e.g., Skyr, Haferflocken, Chicken, Rice)..."
@@ -565,7 +566,6 @@ function App() {
                 }}
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white"
               />
-
               <div className="space-y-1.5 max-h-44 overflow-y-auto">
                 {searchResults.map((item, idx) => {
                   const kcal = Math.round((item.calories * customFoodGrams) / 100);
@@ -587,7 +587,6 @@ function App() {
               </div>
             </div>
 
-            {/* Common Foods 1-Tap */}
             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2.5">
               <h3 className="text-xs font-bold uppercase text-slate-300">2. Quick-Add Everyday Foods (1 Tap)</h3>
               <div className="grid grid-cols-2 gap-2">
@@ -606,10 +605,8 @@ function App() {
           </div>
         )}
 
-        {/* TAB 3: PROGRESS, WATCH SYNC & BIOMETRICS */}
         {activeTab === 'analytics' && (
           <div className="space-y-4">
-            {/* Accurate Galaxy Watch Sync Box */}
             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
               <h2 className="text-xs font-bold uppercase text-emerald-400 flex justify-between">
                 <span>⌚ Samsung Galaxy Watch Sync</span>
@@ -617,10 +614,6 @@ function App() {
                   Live HR: {watchData.heartRate} BPM
                 </span>
               </h2>
-              <p className="text-[11px] text-slate-400">
-                Pair via Bluetooth GATT below, or adjust the sliders to match your Samsung Health Watch screen at any time (no fake numbers!):
-              </p>
-
               <div className="space-y-2.5 bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs">
                 <div>
                   <div className="flex justify-between mb-1">
@@ -629,7 +622,6 @@ function App() {
                   </div>
                   <input type="range" min="45" max="195" value={watchData.heartRate} onChange={(e) => setWatchData({ ...watchData, heartRate: Number(e.target.value) })} className="w-full accent-rose-500" />
                 </div>
-
                 <div className="grid grid-cols-2 gap-2 pt-1">
                   <div>
                     <label className="text-[10px] text-slate-400 block mb-1">Watch Steps Today</label>
@@ -641,7 +633,6 @@ function App() {
                   </div>
                 </div>
               </div>
-
               <button
                 onClick={() => connectRealWatchBLE(
                   (liveBpm, devName) => setWatchData(w => ({ ...w, connected: true, device: devName, heartRate: liveBpm })),
@@ -654,7 +645,6 @@ function App() {
               {syncStatus && <p className="text-[11px] text-amber-300 bg-amber-500/10 p-2.5 rounded-xl border border-amber-500/30">{syncStatus}</p>}
             </div>
 
-            {/* Clearly Labeled Weekly Body Check-In */}
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -665,8 +655,6 @@ function App() {
               className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3"
             >
               <h2 className="text-xs font-bold uppercase text-emerald-400">Log Week {activeWeek} Body & Strength Check-In</h2>
-              <p className="text-[11px] text-slate-400">Measure once a week in the morning. Used by the Plateau Engine to adjust your workouts:</p>
-              
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-[11px] text-slate-300 font-semibold block">Body Weight (kg)</label>
@@ -678,23 +666,12 @@ function App() {
                   <span className="text-[10px] text-slate-500 block mb-1">Measured around belly button</span>
                   <input type="number" step="0.5" value={newBio.waistCm} onChange={(e) => setNewBio({ ...newBio, waistCm: Number(e.target.value) })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm font-bold" />
                 </div>
-                <div>
-                  <label className="text-[11px] text-slate-300 font-semibold block">Max Pull-ups (Reps)</label>
-                  <span className="text-[10px] text-slate-500 block mb-1">Unbroken strict reps in 1 set</span>
-                  <input type="number" value={newBio.maxPullups} onChange={(e) => setNewBio({ ...newBio, maxPullups: Number(e.target.value) })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm font-bold" />
-                </div>
-                <div>
-                  <label className="text-[11px] text-slate-300 font-semibold block">Max Push-ups (Reps)</label>
-                  <span className="text-[10px] text-slate-500 block mb-1">Unbroken strict reps in 1 set</span>
-                  <input type="number" value={newBio.maxPushups} onChange={(e) => setNewBio({ ...newBio, maxPushups: Number(e.target.value) })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm font-bold" />
-                </div>
               </div>
               <button type="submit" className="w-full py-2.5 bg-emerald-500 text-slate-950 font-bold text-xs rounded-xl">Save Week {activeWeek} Check-In</button>
             </form>
           </div>
         )}
 
-        {/* TAB 4: SETUP & SETTINGS */}
         {activeTab === 'setup' && (
           <div className="space-y-4">
             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
@@ -711,7 +688,6 @@ function App() {
             </div>
           </div>
         )}
-
       </main>
 
       <nav className="fixed bottom-0 inset-x-0 z-30 bg-slate-900/95 border-t border-slate-800 px-2 py-2">
