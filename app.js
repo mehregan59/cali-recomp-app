@@ -1,7 +1,7 @@
 const { useState, useEffect, useMemo, useRef } = React;
 
-const speakText = (text) => {
-  if ('speechSynthesis' in window) {
+const speakText = (text, enabled = true) => {
+  if (enabled && 'speechSynthesis' in window) {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = 1.0;
@@ -44,7 +44,7 @@ function ExerciseVisualCoach({ animType, name, steps }) {
 
     const render = () => {
       t += 0.04;
-      const rep = (Math.sin(t) + 1) / 2; // Smooth 0 -> 1 -> 0 cycle
+      const rep = (Math.sin(t) + 1) / 2;
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -64,8 +64,7 @@ function ExerciseVisualCoach({ animType, name, steps }) {
       const shoe = '#f8fafc';
 
       if (animType === 'tempo_pushup') {
-        // TEMPO 3-1-1 PUSH-UP: Asymmetric slow 3s lowering, 1s bottom pause, fast push + Live Phase HUD
-        const cycleSec = (t * 1.4) % 5; // 5-second total rep loop (3s down, 1s hold, 1s up)
+        const cycleSec = (t * 1.4) % 5;
         let depth = 0;
         let phaseLabel = '3s SLOW LOWERING ⬇️';
         if (cycleSec < 3) {
@@ -91,46 +90,38 @@ function ExerciseVisualCoach({ animType, name, steps }) {
         drawLimb(108 + depth * 8, 86 + drop * 0.4, 92, 114, 8, skin);
         drawHead(shoulderX - 16, shoulderY - 4, 9);
 
-        // Tempo HUD Badge
         ctx.fillStyle = '#34d399';
         ctx.font = 'bold 10px monospace';
         ctx.fillText(phaseLabel, 20, 22);
 
       } else if (animType === 'diamond_pushup') {
-        // DIAMOND PUSH-UP (FRONT/3D VIEW): Shows hands touching in a ♦ Diamond under sternum & elbows tucked to ribs!
         const drop = rep * 28;
         const centerX = 150;
         const handY = 114;
         const shoulderY = 48 + drop;
-        const elbowSpread = 22 + rep * 10; // Elbows stay tucked narrow!
+        const elbowSpread = 22 + rep * 10;
         const elbowY = 82 + drop * 0.45;
 
-        // Legs extending back in perspective
         drawLimb(centerX - 10, shoulderY - 6, centerX - 18, 28, 10, pants);
         drawLimb(centerX + 10, shoulderY - 6, centerX + 18, 28, 10, pants);
-        // Wide Shoulders / Upper Chest
         drawLimb(centerX - 26, shoulderY, centerX + 26, shoulderY, 18, shirt);
-        // Left & Right Triceps/Arms converging to a single Diamond point at centerX!
-        drawLimb(centerX - 24, shoulderY, centerX - elbowSpread, elbowY, 9, '#f59e0b'); // Highlighted triceps
+        drawLimb(centerX - 24, shoulderY, centerX - elbowSpread, elbowY, 9, '#f59e0b');
         drawLimb(centerX - elbowSpread, elbowY, centerX - 4, handY, 8, skin);
         drawLimb(centerX + 24, shoulderY, centerX + elbowSpread, elbowY, 9, '#f59e0b');
         drawLimb(centerX + elbowSpread, elbowY, centerX + 4, handY, 8, skin);
         drawHead(centerX, shoulderY + 4, 10);
 
-        // Glowing ♦ Diamond Hand Position Indicator
         ctx.fillStyle = '#fbbf24';
         ctx.font = 'bold 11px monospace';
         ctx.fillText('♦ DIAMOND GRIP (TRICEPS)', 18, 22);
 
       } else if (animType === 'archer_pushup') {
-        // ARCHER PUSH-UP (FRONT VIEW): Wide hands, shifting torso side-to-side while opposite arm stays locked straight
         const shift = Math.sin(t) * 32;
         const drop = Math.abs(Math.sin(t)) * 22;
         const centerX = 150 + shift;
         const shoulderY = 54 + drop;
 
         drawLimb(centerX - 20, shoulderY, centerX + 20, shoulderY, 16, shirt);
-        // Left Arm (wide hand at x=85) & Right Arm (wide hand at x=215)
         drawLimb(centerX - 18, shoulderY, 85, 114, 8, skin);
         drawLimb(centerX + 18, shoulderY, 215, 114, 8, skin);
         drawHead(centerX, shoulderY - 8, 9);
@@ -139,7 +130,6 @@ function ExerciseVisualCoach({ animType, name, steps }) {
         ctx.fillText('⇄ WIDE SIDE-TO-SIDE ARCHER', 18, 22);
 
       } else if (animType === 'pike_pushup') {
-        // PIKE PUSH-UP: Steep inverted V-shape on floor, hips high, crown of head lowers between hands
         const dip = rep * 24;
         const handX = 95, handY = 114;
         const footX = 215, footY = 114;
@@ -157,11 +147,10 @@ function ExerciseVisualCoach({ animType, name, steps }) {
         ctx.fillText('▲ INVERTED V-PIKE (SHOULDERS)', 18, 22);
 
       } else if (animType === 'floor_pulldown' || animType === 'prone_cobra') {
-        // NO-EQUIPMENT FLOOR PULL: Lying face down on floor, lifting chest & driving elbows back to contract lats
         const pull = rep * 28;
         const hipX = 175, hipY = 110;
         const footX = 240, footY = 113;
-        const shoulderX = 112 + pull * 0.35, shoulderY = 104 - rep * 18; // Chest lifts off floor!
+        const shoulderX = 112 + pull * 0.35, shoulderY = 104 - rep * 18;
         const handX = 65 + pull * 1.4, handY = 106 - (animType === 'prone_cobra' ? 14 : 0);
         const elbowX = 90 + pull * 1.2, elbowY = 98 - rep * 10;
 
@@ -175,20 +164,16 @@ function ExerciseVisualCoach({ animType, name, steps }) {
         ctx.fillText('FLOOR LAT PULL & BACK EXTENSION (NO BAR)', 18, 22);
 
       } else if (animType === 'floor_leg_raise') {
-        // LYING FLOOR LEG RAISE (ZERO EQUIPMENT): Lying flat on back on floor, raising straight legs from 0° to 90°!
         const hipX = 125, hipY = 109;
         const shoulderX = 72, shoulderY = 109;
-        // Angle goes from horizontal just above floor (0.08 rad) up to vertical 90° (PI/2)
         const angle = 0.08 + rep * (Math.PI / 2 - 0.08);
         const legLen = 62;
         const footX = hipX + Math.cos(angle) * legLen;
         const footY = hipY - Math.sin(angle) * legLen;
 
-        // Torso & Arms flat on the floor
         drawLimb(shoulderX, shoulderY, hipX, hipY, 14, shirt);
         drawLimb(shoulderX + 10, shoulderY + 2, hipX + 5, 114, 7, skin);
         drawHead(shoulderX - 14, shoulderY - 3, 8);
-        // Straight legs lifting to 90 degrees!
         drawLimb(hipX, hipY - rep * 5, footX, footY, 11, pants);
         drawLimb(footX, footY, footX + 6, footY - 3, 7, shoe);
         ctx.fillStyle = '#a855f7';
@@ -196,7 +181,6 @@ function ExerciseVisualCoach({ animType, name, steps }) {
         ctx.fillText('⬆️ LYING FLOOR LEG RAISE (NO BAR)', 18, 22);
 
       } else if (animType === 'floor_v_up' || animType === 'hollow_hold') {
-        // FLOOR V-UP / HOLLOW HOLD: Torso and straight legs fold upward into a V on the floor
         const fold = animType === 'hollow_hold' ? 0.25 + rep * 0.1 : rep * 0.85;
         const hipX = 148, hipY = 110;
         const shoulderX = hipX - Math.cos(fold) * 48;
@@ -206,14 +190,13 @@ function ExerciseVisualCoach({ animType, name, steps }) {
 
         drawLimb(shoulderX, shoulderY, hipX, hipY, 14, shirt);
         drawLimb(hipX, hipY, footX, footY, 11, pants);
-        drawLimb(shoulderX, shoulderY, footX - 15, footY + 5, 7, skin); // Hands reaching toward toes
+        drawLimb(shoulderX, shoulderY, footX - 15, footY + 5, 7, skin);
         drawHead(shoulderX - 10, shoulderY - 8, 8);
         ctx.fillStyle = '#a855f7';
         ctx.font = 'bold 10px monospace';
         ctx.fillText(animType === 'hollow_hold' ? 'FLOOR HOLLOW BODY HOLD' : 'FLOOR V-UP COMPRESSION', 18, 22);
 
       } else if (animType === 'floor_lunge' || animType === 'pistol_squat') {
-        // FLOOR SPLIT SQUAT / PISTOL SQUAT (NO BENCH): Both feet on floor level
         const depth = rep * 26;
         const hipX = 145, hipY = 58 + depth;
         const shoulderX = 143, shoulderY = 26 + depth;
@@ -221,10 +204,8 @@ function ExerciseVisualCoach({ animType, name, steps }) {
         const frontFootX = 115, frontFootY = 114;
 
         if (animType === 'pistol_squat') {
-          // Non-working leg extended straight out in front!
           drawLimb(hipX, hipY, 82, hipY - 4, 10, '#0284c7');
         } else {
-          // Back knee lowering to kiss the floor (no bench!)
           drawLimb(hipX, hipY, 175, 86 + depth * 0.9, 10, '#0284c7');
           drawLimb(175, 86 + depth * 0.9, 208, 114, 9, '#0284c7');
         }
@@ -239,7 +220,6 @@ function ExerciseVisualCoach({ animType, name, steps }) {
         ctx.fillText(animType === 'pistol_squat' ? 'SINGLE-LEG PISTOL SQUAT' : 'FLOOR SPLIT SQUAT (NO BENCH)', 18, 22);
 
       } else if (animType === 'glute_bridge') {
-        // SINGLE-LEG FLOOR GLUTE BRIDGE
         const lift = rep * 24;
         const shoulderX = 85, shoulderY = 110;
         const hipX = 140, hipY = 108 - lift;
@@ -249,14 +229,13 @@ function ExerciseVisualCoach({ animType, name, steps }) {
         drawLimb(shoulderX, shoulderY, hipX, hipY, 14, shirt);
         drawLimb(hipX, hipY, kneeX, kneeY, 11, pants);
         drawLimb(kneeX, kneeY, footX, footY, 10, pants);
-        drawLimb(hipX, hipY, 175, 48 - lift, 9, '#0284c7'); // Raised single leg
+        drawLimb(hipX, hipY, 175, 48 - lift, 9, '#0284c7');
         drawHead(shoulderX - 14, shoulderY - 2, 8);
         ctx.fillStyle = '#fbbf24';
         ctx.font = 'bold 10px monospace';
         ctx.fillText('SINGLE-LEG FLOOR BRIDGE', 18, 22);
 
       } else {
-        // RUNNING STRIDE
         const stride = Math.sin(t * 2) * 24;
         const bounce = Math.abs(Math.cos(t * 2)) * 6;
         const shoulderX = 152, shoulderY = 38 - bounce;
@@ -305,55 +284,58 @@ function App() {
   const [activeTab, setActiveTab] = useState('workout');
   const [activeWeek, setActiveWeek] = useState(1);
   const [selectedDayIdx, setSelectedDayIdx] = useState(0);
+  // Missed-Day Catch-Up Mode: 'none' | 'one_day' | 'two_plus_days'
+  const [catchUpMode, setCatchUpMode] = useState('none');
   const [syncStatus, setSyncStatus] = useState('');
 
   const fileInputRef = useRef(null);
 
   const [profile, setProfile] = useState(() => {
-    const s = localStorage.getItem('cali_profile_v10');
+    const s = localStorage.getItem('cali_profile_v11');
     return s ? JSON.parse(s) : {
       age: 32, weightKg: 78, heightCm: 178, gender: 'male',
       level: 'intermediate', durationMonths: 2, daysPerWeek: 4,
-      equipment: 'none', primaryGoal: 'recomp'
+      equipment: 'none', primaryGoal: 'recomp',
+      voiceCoach: true, reminderTime: '18:00'
     };
   });
 
   const [workoutLogs, setWorkoutLogs] = useState(() => {
-    const s = localStorage.getItem('cali_logs_v10');
+    const s = localStorage.getItem('cali_logs_v11');
     return s ? JSON.parse(s) : {};
   });
 
   const [biometrics, setBiometrics] = useState(() => {
-    const s = localStorage.getItem('cali_bio_v10');
+    const s = localStorage.getItem('cali_bio_v11');
     return s ? JSON.parse(s) : [
       { week: 1, date: new Date().toISOString().slice(0, 10), weightKg: 78, waistCm: 86, maxPullups: 12, maxPushups: 20 }
     ];
   });
 
   const [foodLogs, setFoodLogs] = useState(() => {
-    const s = localStorage.getItem('cali_food_v10');
+    const s = localStorage.getItem('cali_food_v11');
     return s ? JSON.parse(s) : [];
   });
 
   const [runLogs, setRunLogs] = useState(() => {
-    const s = localStorage.getItem('cali_run_v10');
+    const s = localStorage.getItem('cali_run_v11');
     return s ? JSON.parse(s) : [];
   });
 
   const [watchData, setWatchData] = useState(() => {
-    const s = localStorage.getItem('cali_watch_v10');
+    const s = localStorage.getItem('cali_watch_v11');
     return s ? JSON.parse(s) : { connected: false, device: 'Samsung Health / Watch', heartRate: 72, caloriesBurned: 0, steps: 5000 };
   });
 
   const [searchResults, setSearchResults] = useState([]);
   const [customFoodGrams, setCustomFoodGrams] = useState(100);
 
-  useEffect(() => { localStorage.setItem('cali_profile_v10', JSON.stringify(profile)); }, [profile]);
-  useEffect(() => { localStorage.setItem('cali_logs_v10', JSON.stringify(workoutLogs)); }, [workoutLogs]);
-  useEffect(() => { localStorage.setItem('cali_bio_v10', JSON.stringify(biometrics)); }, [biometrics]);
-  useEffect(() => { localStorage.setItem('cali_food_v10', JSON.stringify(foodLogs)); }, [foodLogs]);
-  useEffect(() => { localStorage.setItem('cali_run_v10', JSON.stringify(runLogs)); }, [runLogs]);
-  useEffect(() => { localStorage.setItem('cali_watch_v10', JSON.stringify(watchData)); }, [watchData]);
+  useEffect(() => { localStorage.setItem('cali_profile_v11', JSON.stringify(profile)); }, [profile]);
+  useEffect(() => { localStorage.setItem('cali_logs_v11', JSON.stringify(workoutLogs)); }, [workoutLogs]);
+  useEffect(() => { localStorage.setItem('cali_bio_v11', JSON.stringify(biometrics)); }, [biometrics]);
+  useEffect(() => { localStorage.setItem('cali_food_v11', JSON.stringify(foodLogs)); }, [foodLogs]);
+  useEffect(() => { localStorage.setItem('cali_run_v11', JSON.stringify(runLogs)); }, [runLogs]);
+  useEffect(() => { localStorage.setItem('cali_watch_v11', JSON.stringify(watchData)); }, [watchData]);
 
   const [timerSec, setTimerSec] = useState(60);
   const [timerActive, setTimerActive] = useState(false);
@@ -364,10 +346,14 @@ function App() {
       interval = setInterval(() => setTimerSec((s) => s - 1), 1000);
     } else if (timerSec === 0 && timerActive) {
       setTimerActive(false);
-      speakText('Rest finished! Start your next set.');
+      speakText('Rest finished! Start your next set.', profile.voiceCoach !== false);
+      if ('vibrate' in navigator) navigator.vibrate([200, 100, 200]);
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('CaliRecomp Pro', { body: 'Rest timer finished! Start your next set.' });
+      }
     }
     return () => clearInterval(interval);
-  }, [timerActive, timerSec]);
+  }, [timerActive, timerSec, profile.voiceCoach]);
 
   const metrics = useMemo(
     () => calculateMetrics(profile, foodLogs, runLogs, workoutLogs, activeWeek, watchData),
@@ -383,10 +369,12 @@ function App() {
   const targetMax = isShredPhase ? 16 : 12;
   const restSec = isShredPhase ? 45 : 70;
 
+  // Base Run + Food Surplus + Plateau + Missed-Day Catch-Up Run Bonus
   const baseRunMins = activeWeek === 1 ? 10 : activeWeek === 2 ? 12 : activeWeek <= 4 ? 15 : activeWeek <= 6 ? 18 : 22;
-  const todayTargetRunMins = baseRunMins + metrics.extraRunMinutesNeeded + (plateauAdvice.extraRunMins || 0);
+  const catchUpRunBonus = catchUpMode === 'one_day' ? 5 : catchUpMode === 'two_plus_days' ? 7 : 0;
+  const todayTargetRunMins = baseRunMins + metrics.extraRunMinutesNeeded + (plateauAdvice.extraRunMins || 0) + catchUpRunBonus;
 
-  const days = useMemo(() => [
+  const baseDays = useMemo(() => [
     {
       dayNumber: 1, title: 'Run + Floor Push & Core',
       exercises: [
@@ -426,7 +414,51 @@ function App() {
     }
   ].slice(0, profile.daysPerWeek), [pool, setsCount, targetMin, targetMax, profile.daysPerWeek, todayTargetRunMins]);
 
-  const activeDay = days[selectedDayIdx] || days[0];
+  // --- MISSED-DAY SMART CATCH-UP MERGER ENGINE ---
+  const activeDay = useMemo(() => {
+    const scheduled = baseDays[selectedDayIdx] || baseDays[0];
+    if (catchUpMode === 'none') return scheduled;
+
+    if (catchUpMode === 'one_day') {
+      // Pull the top 2 compound movements from the previous workout day and inject as Catch-Up Supersets
+      const prevDayIdx = (selectedDayIdx - 1 + baseDays.length) % baseDays.length;
+      const prevDay = baseDays[prevDayIdx];
+      const missedCompounds = prevDay.exercises
+        .filter(e => e.category !== 'Run' && e.category !== 'Core')
+        .slice(0, 2)
+        .map(e => ({
+          ...e,
+          id: `catchup_${e.id}`,
+          name: `⚡ Catch-Up (From Day ${prevDay.dayNumber}): ${e.name}`,
+          sets: 3,
+          isCatchUp: true
+        }));
+
+      return {
+        ...scheduled,
+        title: `${scheduled.title} + Day ${prevDay.dayNumber} Catch-Up`,
+        exercises: [
+          scheduled.exercises[0], // Opening Run (already includes +5m catch-up bonus)
+          ...missedCompounds,
+          ...scheduled.exercises.slice(1)
+        ]
+      };
+    }
+
+    // catchUpMode === 'two_plus_days': Full-Body Metabolic Consolidation Session
+    return {
+      dayNumber: scheduled.dayNumber,
+      title: '⚡ Full-Body Missed-Days Consolidation',
+      exercises: [
+        scheduled.exercises[0], // Opening Run (+7m catch-up bonus)
+        { ...pool.push[0], id: 'cu_push', name: `⚡ Full-Body Push: ${pool.push[0].name}`, sets: 3, min: targetMin, max: targetMax, unit: 'reps', isCatchUp: true },
+        { ...pool.pull[0], id: 'cu_pull', name: `⚡ Full-Body Pull: ${pool.pull[0].name}`, sets: 3, min: targetMin, max: targetMax, unit: 'reps', isCatchUp: true },
+        { ...pool.legs[0], id: 'cu_legs', name: `⚡ Full-Body Legs: ${pool.legs[0].name}`, sets: 3, min: targetMin, max: targetMax, unit: 'reps', isCatchUp: true },
+        { ...pool.core[0], id: 'cu_core', name: `⚡ Full-Body Core: ${pool.core[0].name}`, sets: 3, min: 12, max: 16, unit: 'reps', isCatchUp: true }
+      ]
+    };
+  }, [baseDays, selectedDayIdx, catchUpMode, pool, targetMin, targetMax]);
+
   const logSet = (exId, sIdx, val) => setWorkoutLogs((p) => ({ ...p, [`w${activeWeek}-d${activeDay.dayNumber}-${exId}-s${sIdx}`]: Math.max(0, val) }));
   const getSet = (w, d, exId, sIdx) => workoutLogs[`w${w}-d${d}-${exId}-s${sIdx}`] ?? 0;
 
@@ -472,26 +504,67 @@ function App() {
             </div>
 
             <div className="grid grid-cols-4 gap-1.5">
-              {days.map((d, idx) => (
+              {baseDays.map((d, idx) => (
                 <button key={d.dayNumber} onClick={() => setSelectedDayIdx(idx)} className={`py-2 rounded-xl text-xs font-bold border ${selectedDayIdx === idx ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300' : 'bg-slate-900 border-slate-800 text-slate-400'}`}>
                   Day {d.dayNumber}
                 </button>
               ))}
             </div>
 
+            {/* 1-TAP MISSED WORKOUT CATCH-UP MERGER BAR */}
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-amber-400">⚡ Missed a Workout Day? (Smart Catch-Up)</span>
+                <span className="text-[10px] text-slate-400">Auto-merges missed muscles & cardio</span>
+              </div>
+              <div className="grid grid-cols-3 gap-1.5">
+                {[
+                  { id: 'none', label: 'On Schedule' },
+                  { id: 'one_day', label: '+1 Missed Day' },
+                  { id: 'two_plus_days', label: '2+ Missed Days' }
+                ].map((m) => (
+                  <button
+                    key={m.id}
+                    onClick={() => setCatchUpMode(m.id)}
+                    className={`py-2 px-2 rounded-xl text-[11px] font-bold border transition ${
+                      catchUpMode === m.id
+                        ? 'bg-amber-500/20 border-amber-500 text-amber-300'
+                        : 'bg-slate-950 border-slate-800 text-slate-400'
+                    }`}
+                  >
+                    {m.label}
+                  </button>
+                ))}
+              </div>
+              {catchUpMode !== 'none' && (
+                <p className="text-[11px] text-amber-300/90 pt-1">
+                  {catchUpMode === 'one_day'
+                    ? '✅ Merged 2 primary movements from yesterday + added +5 mins to your opening Run!'
+                    : '✅ Activated Full-Body Consolidation (Push + Pull + Legs + Core + 7m Run extension) to cover 2+ missed days!'}
+                </p>
+              )}
+            </div>
+
             <div className="space-y-4">
               {activeDay.exercises.map((ex) => (
-                <div key={ex.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+                <div key={ex.id} className={`bg-slate-900 border ${ex.isCatchUp ? 'border-amber-500/50' : 'border-slate-800'} rounded-2xl p-4 space-y-3`}>
                   <div className="flex justify-between items-start gap-2">
                     <div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded-md mb-1 inline-block">
-                        {ex.category === 'Run' ? '🏃‍♂️ Step 1: Progressive Running Block' : `🏋️ Zero-Equipment (${ex.category})`}
+                      <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md mb-1 inline-block ${
+                        ex.isCatchUp ? 'text-amber-300 bg-amber-500/15' : 'text-sky-400 bg-sky-500/10'
+                      }`}>
+                        {ex.category === 'Run' ? '🏃‍♂️ Step 1: Progressive Running Block' : ex.isCatchUp ? `⚡ Missed-Day Catch-Up (${ex.category})` : `🏋️ Zero-Equipment (${ex.category})`}
                       </span>
                       <h3 className="text-sm font-bold text-white">{ex.name}</h3>
                       <p className="text-[11px] text-slate-400">{ex.cue}</p>
                     </div>
                     <button
-                      onClick={() => { setTimerSec(ex.category === 'Run' ? ex.min * 60 : restSec); setTimerActive(true); }}
+                      onClick={() => {
+                        const sec = ex.category === 'Run' ? ex.min * 60 : restSec;
+                        setTimerSec(sec);
+                        setTimerActive(true);
+                        speakText(ex.category === 'Run' ? `Starting ${ex.min} minute run.` : `Rest timer started for ${restSec} seconds.`, profile.voiceCoach !== false);
+                      }}
                       className="shrink-0 text-[11px] bg-slate-950 border border-slate-800 px-2.5 py-1.5 rounded-lg text-emerald-400 font-bold"
                     >
                       {ex.category === 'Run' ? `⏱️ Start ${ex.min}m Run` : `Target: ${ex.min}–${ex.max} ${ex.unit}`}
@@ -607,6 +680,14 @@ function App() {
 
         {activeTab === 'analytics' && (
           <div className="space-y-4">
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2">
+              <h2 className="text-xs font-bold uppercase text-emerald-400 flex justify-between">
+                <span>📊 Weight Trajectory & Plateau Status</span>
+                <span className="text-white font-mono">{plateauAdvice.status}</span>
+              </h2>
+              <p className="text-xs text-slate-300">{plateauAdvice.action}</p>
+            </div>
+
             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
               <h2 className="text-xs font-bold uppercase text-emerald-400 flex justify-between">
                 <span>⌚ Samsung Galaxy Watch Sync</span>
@@ -674,6 +755,7 @@ function App() {
 
         {activeTab === 'setup' && (
           <div className="space-y-4">
+            {/* BMI & Biometrics */}
             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
               <h2 className="text-sm font-bold text-white flex justify-between">
                 <span>🧮 BMI & BMR Biometrics</span>
@@ -685,6 +767,81 @@ function App() {
                 <div><label className="text-[10px] text-slate-400 block mb-1">Weight (kg)</label><input type="number" step="0.5" value={profile.weightKg} onChange={(e) => setProfile({ ...profile, weightKg: Number(e.target.value) })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold" /></div>
                 <div><label className="text-[10px] text-slate-400 block mb-1">Height (cm)</label><input type="number" value={profile.heightCm} onChange={(e) => setProfile({ ...profile, heightCm: Number(e.target.value) })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold" /></div>
               </div>
+            </div>
+
+            {/* Notifications & Voice Coach Settings */}
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+              <h2 className="text-sm font-bold text-white">🔔 Notifications & Voice Coach</h2>
+              <div className="grid grid-cols-2 gap-2.5">
+                <button
+                  onClick={() => {
+                    if ('Notification' in window) {
+                      Notification.requestPermission().then(p => setSyncStatus(p === 'granted' ? 'Android Notifications Enabled!' : 'Permission blocked.'));
+                    }
+                  }}
+                  className="py-2.5 px-3 bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 rounded-xl text-xs font-bold"
+                >
+                  Enable Push Alerts
+                </button>
+                <button
+                  onClick={() => setProfile(p => ({ ...p, voiceCoach: p.voiceCoach === false ? true : false }))}
+                  className={`py-2.5 px-3 rounded-xl text-xs font-bold border ${
+                    profile.voiceCoach !== false ? 'bg-sky-500/20 border-sky-500 text-sky-300' : 'bg-slate-950 border-slate-800 text-slate-400'
+                  }`}
+                >
+                  Voice Coach: {profile.voiceCoach !== false ? 'ON 🔊' : 'OFF 🔇'}
+                </button>
+              </div>
+            </div>
+
+            {/* Backup & Transfer Data */}
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+              <h2 className="text-sm font-bold text-white">💾 Private Phone Backup (.JSON)</h2>
+              <p className="text-[11px] text-slate-400">Your logs are stored strictly on your own phone. Export or import a backup file anytime:</p>
+              <div className="grid grid-cols-2 gap-2.5">
+                <button
+                  onClick={() => {
+                    const payload = { profile, workoutLogs, biometrics, foodLogs, runLogs, watchData, exportedAt: new Date().toISOString() };
+                    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a'); a.href = url; a.download = 'cali-recomp-backup.json'; a.click();
+                    URL.revokeObjectURL(url);
+                  }}
+                  className="py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs font-bold text-emerald-400"
+                >
+                  ⬇ Export Backup
+                </button>
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs font-bold text-sky-400"
+                >
+                  ⬆ Import Backup
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".json"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                      try {
+                        const data = JSON.parse(ev.target.result);
+                        if (data.profile) setProfile(data.profile);
+                        if (data.workoutLogs) setWorkoutLogs(data.workoutLogs);
+                        if (data.biometrics) setBiometrics(data.biometrics);
+                        if (data.foodLogs) setFoodLogs(data.foodLogs);
+                        if (data.runLogs) setRunLogs(data.runLogs);
+                        setSyncStatus('Backup restored successfully!');
+                      } catch { setSyncStatus('Invalid backup file.'); }
+                    };
+                    reader.readAsText(file);
+                  }}
+                  className="hidden"
+                />
+              </div>
+              {syncStatus && <p className="text-xs text-emerald-300 bg-emerald-500/10 p-2.5 rounded-xl border border-emerald-500/30">{syncStatus}</p>}
             </div>
           </div>
         )}
