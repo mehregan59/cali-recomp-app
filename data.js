@@ -1,4 +1,4 @@
-// --- EXERCISE DATABASE WITH UNIQUE MOTION KEYFRAMES & STEP-BY-STEP GUIDES ---
+// --- 100% ZERO-EQUIPMENT (NO TOOLS) CALISTHENICS & RUNNING LIBRARY ---
 
 const EXERCISE_LIBRARY = {
   run_zone2: {
@@ -11,200 +11,214 @@ const EXERCISE_LIBRARY = {
     steps: [
       '1. Keep torso tall with a slight forward lean from the ankles.',
       '2. Land mid-foot directly under your hips (avoid heavy heel striking).',
-      '3. Maintain a conversational pace where you can speak full sentences.'
+      '3. Maintain a steady pace where you can speak full sentences without gasping.'
     ]
   },
-  incline_pushup: {
-    id: 'incline_pushup',
-    name: 'Incline Push-ups',
+  knee_pushup: {
+    id: 'knee_pushup',
+    name: 'Strict Knee / Tempo Floor Push-ups',
     category: 'Push',
-    animType: 'incline_pushup',
-    next: 'Tempo Push-ups',
-    cue: 'Hands elevated on a bench, box, or sturdy table. Body in one straight line.',
+    animType: 'tempo_pushup',
+    next: 'Tempo Push-ups (3-1-1)',
+    cue: 'Zero equipment needed. Keep hips in a straight line from knees/feet to shoulders.',
     steps: [
-      '1. Place hands slightly wider than shoulder-width on an elevated surface.',
-      '2. Lower your chest slowly (3 seconds) toward the edge with elbows at 45°.',
-      '3. Press explosively back to full arm lockout while squeezing your core.'
+      '1. Place hands slightly wider than shoulder-width flat on the floor.',
+      '2. Lower your chest slowly (3 seconds) until it grazes the floor.',
+      '3. Press firmly through your palms back to full arm extension.'
     ]
   },
   tempo_pushup: {
     id: 'tempo_pushup',
     name: 'Tempo Push-ups (3-1-1)',
     category: 'Push',
-    animType: 'pushup',
+    animType: 'tempo_pushup',
     next: 'Archer Push-ups',
-    cue: '3 seconds down, 1 second pause just above floor, 1 second explosive push.',
+    cue: 'Wide shoulder-width stance. 3s slow descent, 1s bottom hold, 1s press.',
     steps: [
-      '1. High plank position: hands under shoulders, glutes and abs locked tight.',
-      '2. Lower your whole body as one rigid unit over 3 full seconds until chest grazes floor.',
-      '3. Pause 1 second at the bottom without resting on the ground, then push up.'
+      '1. High plank on the floor: hands shoulder-width, abs and glutes braced.',
+      '2. Take a full 3 seconds to lower your chest to 2cm above the floor.',
+      '3. Hold 1 second at the bottom without touching the ground, then drive up.'
     ]
   },
   pike_pushup: {
     id: 'pike_pushup',
-    name: 'Pike Push-ups (Shoulder Focus)',
+    name: 'Floor Pike Push-ups (Shoulder Press)',
     category: 'Push',
     animType: 'pike_pushup',
-    next: 'Elevated Pike / Wall HSPU',
-    cue: 'Hips high in an inverted V-shape. Lower the top of your head forward between hands.',
+    next: 'Deep Deficit Pike Push-up',
+    cue: 'Hips high in an upside-down V-shape on the floor. Lower crown of head forward.',
     steps: [
-      '1. Walk feet forward so your body forms a steep upside-down "V" (hips high).',
-      '2. Bend elbows and lower the crown of your head forward in front of your hands (forming a triangle).',
-      '3. Press your head and torso back up and slightly backward toward your feet.'
+      '1. From a push-up position, walk your feet forward so your hips form a steep inverted "V".',
+      '2. Bend elbows and lower the top of your head toward the floor slightly in front of your fingers.',
+      '3. Push through your shoulders to press your torso back up to the starting V-shape.'
     ]
   },
   diamond_pushup: {
     id: 'diamond_pushup',
-    name: 'Diamond / Close-Grip Push-ups',
+    name: 'Diamond Push-ups (Triceps Focus)',
     category: 'Push',
     animType: 'diamond_pushup',
-    next: 'Ring / Bar Dips',
-    cue: 'Index fingers and thumbs form a diamond under your chest. Triceps overload.',
+    next: 'Pseudo Planche Push-ups',
+    cue: 'Thumbs and index fingers touch to form a ♦ diamond shape directly under your chest.',
     steps: [
-      '1. Bring hands together directly beneath your sternum so thumbs and index fingers touch.',
-      '2. Keep elbows tucked close to your ribs as you lower your chest to your hands.',
-      '3. Drive up to full elbow extension to maximally contract the triceps.'
+      '1. Place both hands close together under your sternum so index fingers and thumbs form a diamond ♦.',
+      '2. Tuck your elbows tightly against your ribs as you lower your chest onto the back of your hands.',
+      '3. Press straight up, squeezing the triceps hard at the top lockout.'
     ]
   },
   archer_pushup: {
     id: 'archer_pushup',
-    name: 'Archer Push-ups',
+    name: 'Side-to-Side Archer Push-ups',
     category: 'Push',
-    animType: 'pushup',
-    next: 'One-Arm Push-up Prog.',
-    cue: 'Wide hands. Shift 80% of your bodyweight onto one working arm; other arm stays straight.',
+    animType: 'archer_pushup',
+    next: 'One-Arm Push-up Progression',
+    cue: 'Extra-wide hands on floor. Shift 80% weight onto one arm while the other arm stays straight.',
     steps: [
-      '1. Place hands twice as wide as shoulder-width, fingers angled outward.',
-      '2. Lower your chest directly over your left hand while keeping your right arm completely straight.',
-      '3. Push back to center and repeat on the right side.'
+      '1. Place hands twice as wide as shoulder-width on the floor.',
+      '2. Shift your torso over your left hand, bending the left elbow while keeping your right arm locked straight.',
+      '3. Push back to the center and repeat on the right arm.'
     ]
   },
-  australian_row: {
-    id: 'australian_row',
-    name: 'Australian Bodyweight Rows',
+  sliding_floor_pulldown: {
+    id: 'sliding_floor_pulldown',
+    name: 'Prone Floor Lat Pull-Downs (No Bar)',
     category: 'Pull',
-    animType: 'row',
-    next: 'Strict Pull-ups',
-    cue: 'Hang underneath a low bar, rings, or sturdy table. Pull chest to the bar.',
+    animType: 'floor_pulldown',
+    next: 'Single-Arm Floor Pulls',
+    cue: 'Lie face down on the floor. Press forearms/palms down and slide/pull your chest forward.',
     steps: [
-      '1. Grip a waist-high bar with arms straight, heels on the floor, and body straight.',
-      '2. Pull your shoulder blades together and drive elbows back until your chest touches the bar.',
-      '3. Pause 1 second squeezing your upper back, then lower slowly over 3 seconds.'
+      '1. Lie face down on a smooth floor with arms extended overhead like Superman.',
+      '2. Drive your elbows down toward your back pockets and squeeze your lats to lift and slide your chest forward.',
+      '3. Hold the peak back contraction for 2 seconds, then slowly extend arms back overhead.'
     ]
   },
-  strict_pullup: {
-    id: 'strict_pullup',
-    name: 'Strict Pull-ups (Overhand)',
+  prone_cobra: {
+    id: 'prone_cobra',
+    name: 'Prone Floor Y-T-W Back Extensions',
     category: 'Pull',
-    animType: 'pullup',
-    next: 'Chest-to-Bar / L-Sit Pull-ups',
-    cue: 'Start from a full dead hang. Pull chin cleanly over the bar without kicking legs.',
+    animType: 'prone_cobra',
+    next: 'Prone Floor Lat Pull-Downs',
+    cue: 'Lie face down on the floor. Lift chest and sweep arms from Y to T to W, squeezing upper back.',
     steps: [
-      '1. Grip the bar slightly wider than shoulders in a full dead hang (arms straight).',
-      '2. Depress your shoulder blades down away from your ears, then drive elbows toward your ribs.',
-      '3. Pull until your chin clears the bar, then lower all the way down over 3 seconds.'
+      '1. Lie face down on the floor, toes touching the ground, glutes tight.',
+      '2. Lift your chest off the floor and pull your shoulder blades together and down.',
+      '3. Sweep your arms from overhead (Y) out to the sides (T) and elbows tucked (W), pausing 2s each.'
     ]
   },
-  towel_row: {
-    id: 'towel_row',
-    name: 'Doorframe / Towel Rows (No Bar)',
+  reverse_snow_angel: {
+    id: 'reverse_snow_angel',
+    name: 'Reverse Floor Snow Angels (Rear Delts & Lats)',
     category: 'Pull',
-    animType: 'row',
-    next: 'Single-Arm Towel Rows',
-    cue: 'Loop a strong towel around a doorframe/post, lean back, and row chest to hands.',
+    animType: 'prone_cobra',
+    next: 'Isometric Towel / Floor Row',
+    cue: 'Hover hands above the floor while lying face down; sweep arms in a full arc from hips to overhead.',
     steps: [
-      '1. Anchor a towel around a solid handle/pillar, feet close to the base, leaning back.',
-      '2. Keep body straight and pull yourself forward using your lats and biceps.',
-      '3. Control the lowering phase for 3 full seconds.'
+      '1. Lie face down, forehead hovering just above the floor, hands by your hips with palms facing up.',
+      '2. Keep elbows locked straight and sweep your arms in a wide circle all the way overhead without touching the ground.',
+      '3. Reverse the motion slowly over 3 seconds while pinching your shoulder blades.'
     ]
   },
-  split_squat: {
-    id: 'split_squat',
-    name: 'Bulgarian Split Squats',
+  reverse_lunge: {
+    id: 'reverse_lunge',
+    name: 'Slow Tempo Floor Split Squats (No Bench)',
     category: 'Legs',
-    animType: 'split_squat',
+    animType: 'floor_lunge',
     next: 'Assisted Pistol Squats',
-    cue: 'Rear foot elevated on a chair/bench. Lower back knee toward the floor.',
+    cue: 'Split stance on the floor. Lower back knee until it hovers 1cm above the ground.',
     steps: [
-      '1. Stand 2 feet in front of a chair/bench and rest the top of your back foot on it.',
-      '2. Lower your hips straight down over 3 seconds until your front thigh is parallel to the floor.',
-      '3. Drive through your front heel to stand back up. Complete all reps on Left, then Right.'
+      '1. Take a long step backward on the floor so both feet are hip-width apart in a split stance.',
+      '2. Lower your hips straight down over 3 seconds until your back knee lightly kisses the floor.',
+      '3. Drive through your front heel to stand tall. Complete all reps on Left leg, then switch to Right.'
     ]
   },
-  nordic_curl: {
-    id: 'nordic_curl',
-    name: 'Hamstring Bridges / Nordic Eccentrics',
+  glute_bridge: {
+    id: 'glute_bridge',
+    name: 'Single-Leg Floor Hamstring Walkouts / Bridges',
     category: 'Legs',
-    animType: 'squat',
-    next: 'Full Nordic Curls',
-    cue: 'Drive heels into the ground or anchor feet under a couch to isolate hamstrings.',
+    animType: 'glute_bridge',
+    next: 'Pistol Squats',
+    cue: 'Lie on your back on the floor. Drive one heel into the ground and lift hips high.',
     steps: [
-      '1. Anchor heels firmly and keep hips extended in a straight line with your torso.',
-      '2. Slowly lower your torso (or hips in single-leg bridge) over 4 seconds fighting gravity.',
-      '3. Contract hamstrings and glutes hard to return to the top.'
+      '1. Lie on your back with knees bent and feet flat on the floor. Lift one leg straight up in the air.',
+      '2. Drive through your grounded heel to bridge your hips up until your torso and thigh form a straight line.',
+      '3. Pause 2 seconds squeezing hamstrings and glutes, then lower slowly.'
     ]
   },
   pistol_squat: {
     id: 'pistol_squat',
-    name: 'Single-Leg Assisted Pistol Squats',
+    name: 'Floor Single-Leg Squat (Pistol Progression)',
     category: 'Legs',
-    animType: 'squat',
-    next: 'Strict Unassisted Pistol Squat',
-    cue: 'Extend one leg straight in front while squatting deep on the standing leg.',
+    animType: 'pistol_squat',
+    next: 'Explosive Jump Squats',
+    cue: 'Stand on one leg on the floor, other leg extended forward. Squat as deep as control allows.',
     steps: [
-      '1. Stand on one leg, extending your non-working leg straight out in front of you.',
-      '2. Lightly touch a doorframe/pole for balance as you sit all the way down (hamstring to calf).',
-      '3. Drive through your whole foot to stand back up without collapsing the knee inward.'
+      '1. Stand on one foot and extend your non-working leg straight out in front of you.',
+      '2. Reach your arms forward as a counterbalance and sit your hips back and down over 3 seconds.',
+      '3. Press through your mid-foot to return to standing while keeping your knee aligned with your toes.'
     ]
   },
   hollow_hold: {
     id: 'hollow_hold',
-    name: 'Hollow Body Core Hold',
+    name: 'Floor Hollow Body Core Hold',
     category: 'Core',
     animType: 'hollow_hold',
-    next: 'Hanging Leg Raises',
-    cue: 'Lie on your back, press lower spine flat into the floor, lift shoulders and legs.',
+    next: 'Lying Floor Leg Raises',
+    cue: 'Lie on your back on the floor. Glue lower spine to the ground and lift shoulders & legs.',
     steps: [
-      '1. Lie flat on your back and tuck your pelvis so there is ZERO gap under your lower back.',
-      '2. Lift your shoulder blades and extended legs ~20cm off the floor in a banana shape.',
-      '3. Hold rock-solid tension while breathing shallowly for the target seconds.'
+      '1. Lie flat on your back and tuck your tailbone so your lower back presses firmly into the floor.',
+      '2. Lift your head, shoulders, and straight legs ~15cm off the floor.',
+      '3. Hold completely still for the target seconds without letting your lower back arch.'
     ]
   },
-  hanging_leg_raise: {
-    id: 'hanging_leg_raise',
-    name: 'Hanging Knee / Leg Raises',
+  floor_leg_raise: {
+    id: 'floor_leg_raise',
+    name: 'Lying Floor Leg Raises & Reverse Crunch (No Bar)',
     category: 'Core',
-    animType: 'hanging_leg_raise',
-    next: 'Strict Toes-to-Bar',
-    cue: 'Hang from a bar (or lie flat on floor) and curl your legs & pelvis upward to 90°.',
+    animType: 'floor_leg_raise',
+    next: 'Floor V-Up Compression',
+    cue: 'Lie flat on your back on the floor. Raise straight legs to 90° and curl hips off the ground.',
     steps: [
-      '1. Hang from the pull-up bar with active shoulders (do not sag into your joints).',
-      '2. Without swinging, exhale and raise your legs until parallel to the ground (or higher), curling your tailbone up.',
-      '3. Lower your legs slowly over 3 seconds so you do not swing back and forth.'
+      '1. Lie flat on your back on the floor with palms pressed into the ground beside your hips.',
+      '2. Keeping legs straight and together, raise them up to 90° and curl your tailbone 5cm off the floor at the top.',
+      '3. Lower your legs slowly over 3 seconds until heels hover 2cm above the floor—never let your lower back arch.'
+    ]
+  },
+  floor_v_up: {
+    id: 'floor_v_up',
+    name: 'Floor V-Ups / Seated L-Sit Lifts (No Bar)',
+    category: 'Core',
+    animType: 'floor_v_up',
+    next: 'Full Floor L-Sit Hold',
+    cue: 'Fold torso and straight legs up simultaneously on the floor to touch your toes.',
+    steps: [
+      '1. Lie flat on the floor with arms extended overhead and legs straight.',
+      '2. Explosively crunch your torso and straight legs up at the same time so your body forms a "V" and hands touch shins/toes.',
+      '3. Control the descent back to a hollow position without dropping your feet to the floor.'
     ]
   }
 };
 
-const getExercisePool = (level, eq) => {
+// Returns 100% Zero-Equipment Exercises for All Levels
+const getExercisePool = (level) => {
   const push = {
-    beginner: [EXERCISE_LIBRARY.incline_pushup, EXERCISE_LIBRARY.pike_pushup, EXERCISE_LIBRARY.diamond_pushup],
+    beginner: [EXERCISE_LIBRARY.knee_pushup, EXERCISE_LIBRARY.pike_pushup, EXERCISE_LIBRARY.diamond_pushup],
     intermediate: [EXERCISE_LIBRARY.tempo_pushup, EXERCISE_LIBRARY.pike_pushup, EXERCISE_LIBRARY.diamond_pushup],
     advanced: [EXERCISE_LIBRARY.archer_pushup, EXERCISE_LIBRARY.pike_pushup, EXERCISE_LIBRARY.diamond_pushup]
   };
   const pull = {
-    beginner: eq === 'none' ? [EXERCISE_LIBRARY.towel_row, EXERCISE_LIBRARY.australian_row] : [EXERCISE_LIBRARY.australian_row, EXERCISE_LIBRARY.strict_pullup],
-    intermediate: eq === 'none' ? [EXERCISE_LIBRARY.towel_row, EXERCISE_LIBRARY.australian_row] : [EXERCISE_LIBRARY.strict_pullup, EXERCISE_LIBRARY.australian_row],
-    advanced: eq === 'none' ? [EXERCISE_LIBRARY.towel_row, EXERCISE_LIBRARY.australian_row] : [EXERCISE_LIBRARY.strict_pullup, EXERCISE_LIBRARY.australian_row]
+    beginner: [EXERCISE_LIBRARY.prone_cobra, EXERCISE_LIBRARY.reverse_snow_angel],
+    intermediate: [EXERCISE_LIBRARY.sliding_floor_pulldown, EXERCISE_LIBRARY.prone_cobra],
+    advanced: [EXERCISE_LIBRARY.sliding_floor_pulldown, EXERCISE_LIBRARY.reverse_snow_angel]
   };
   const legs = {
-    beginner: [EXERCISE_LIBRARY.split_squat, EXERCISE_LIBRARY.nordic_curl],
-    intermediate: [EXERCISE_LIBRARY.split_squat, EXERCISE_LIBRARY.pistol_squat],
-    advanced: [EXERCISE_LIBRARY.pistol_squat, EXERCISE_LIBRARY.split_squat]
+    beginner: [EXERCISE_LIBRARY.reverse_lunge, EXERCISE_LIBRARY.glute_bridge],
+    intermediate: [EXERCISE_LIBRARY.reverse_lunge, EXERCISE_LIBRARY.pistol_squat],
+    advanced: [EXERCISE_LIBRARY.pistol_squat, EXERCISE_LIBRARY.glute_bridge]
   };
   const core = {
     beginner: [EXERCISE_LIBRARY.hollow_hold],
-    intermediate: [EXERCISE_LIBRARY.hanging_leg_raise],
-    advanced: [EXERCISE_LIBRARY.hanging_leg_raise]
+    intermediate: [EXERCISE_LIBRARY.floor_leg_raise],
+    advanced: [EXERCISE_LIBRARY.floor_v_up]
   };
   return { push: push[level], pull: pull[level], legs: legs[level], core: core[level], run: EXERCISE_LIBRARY.run_zone2 };
 };
@@ -212,7 +226,7 @@ const getExercisePool = (level, eq) => {
 const COMMON_FOODS = [
   { name: 'Chicken Breast (cooked, 100g)', calories: 165, protein: 31 },
   { name: 'Cooked Rice (100g)', calories: 130, protein: 2.7 },
-  { name: 'Rolled Oats (50g)', calories: 190, protein: 6.5 },
+  { name: 'Rolled Oats / Haferflocken (50g)', calories: 190, protein: 6.5 },
   { name: 'Whole Eggs (2 large)', calories: 144, protein: 12.6 },
   { name: 'Low-Fat Quark / Skyr (250g)', calories: 160, protein: 28 },
   { name: 'Banana (1 medium)', calories: 105, protein: 1.3 },
