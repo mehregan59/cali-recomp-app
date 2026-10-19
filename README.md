@@ -2,7 +2,7 @@
 
 **CaliRecomp Pro Studio** is a personal Progressive Web Application (PWA) designed for a structured **2-to-4-month Calisthenics & Running Body Recomposition Program** (simultaneous visceral fat loss and lean muscle hypertrophy).
 
-**site is live at https://mehregan59.github.io/cali-recomp-app/
+site is live at https://mehregan59.github.io/cali-recomp-app/
 ---
 
 ## ⚠️ Personal Project & Medical / Liability Disclaimer
